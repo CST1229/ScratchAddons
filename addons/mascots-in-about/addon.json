@@ -1,0 +1,22 @@
+{
+  "name": "Show Scratch mascots in about page",
+  "description": "Shows the Scratch mascots above the video in the About page.",
+  "credits": [
+    {
+      "name": "CST1229",
+	  "link": "https://github.com/cst1229"
+    }
+  ],
+  "userstyles": [
+    {
+      "url": "userstyle.css",
+      "matches": ["https://scratch.mit.edu/about/"]
+    }
+  ],
+  "versionAdded": "",
+  "tags": ["community"],
+  "dynamicEnable": true,
+  "dynamicDisable": true,
+  "injectAsStyleElt": true,
+  "enabledByDefault": false
+}
