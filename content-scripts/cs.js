@@ -265,18 +265,6 @@ function waitForDocumentHead() {
 }
 
 async function onInfoAvailable({ globalState: globalStateMsg, l10njson, addonsWithUserscripts, addonsWithUserstyles }) {
-  const isStudio = /^\/studios\/\d+(?:\/(?:projects|comments|curators|activity))?\/?$/.test(location.pathname);
-  if (isStudio && !pseudoUrl) {
-    await waitForDocumentHead();
-    if (document.querySelector("meta[name='format-detection']")) {
-      // scratch-www studio
-      pseudoUrl = location.href.replace("/studios/", "/studios_www/");
-      receivedResponse = false;
-      chrome.runtime.sendMessage({ contentScriptReady: { url: pseudoUrl } }, onResponse);
-      return;
-    }
-  }
-
   // In order for the "everLoadedAddons" not to change when "addonsWithUserscripts" changes, we stringify and parse
   const everLoadedAddons = JSON.parse(JSON.stringify(addonsWithUserscripts));
   const disabledDynamicAddons = [];
@@ -305,12 +293,15 @@ async function onInfoAvailable({ globalState: globalStateMsg, l10njson, addonsWi
     } else if (request.fireEvent) {
       _page_.fireEvent(request.fireEvent);
     } else if (request.dynamicAddonEnabled) {
-      const { scripts, userstyles, cssVariables, addonId, injectAsStyleElt, index } = request.dynamicAddonEnabled;
+      const { scripts, userstyles, cssVariables, addonId, injectAsStyleElt, index, dynamicEnable, dynamicDisable } =
+        request.dynamicAddonEnabled;
       addStyle({ styles: userstyles, addonId, injectAsStyleElt, index });
       if (everLoadedAddons.find((addon) => addon.addonId === addonId)) {
+        if (!dynamicDisable) return;
         // Addon was reenabled
         _page_.fireEvent({ name: "reenabled", addonId, target: "self" });
       } else {
+        if (!dynamicEnable) return;
         // Addon was not injected in page yet
         _page_.runAddonUserscripts({ addonId, scripts, enabledLate: true });
       }
@@ -529,7 +520,6 @@ if (document.readyState !== "loading") {
 
 const isProfile = pathArr[0] === "users" && pathArr[2] === "";
 const isStudio = pathArr[0] === "studios";
-const r2IsStudioComments = isStudio && pathArr[2] === "comments";
 const isProject = pathArr[0] === "projects";
 
 if (isProfile || isStudio || isProject) {
@@ -556,8 +546,7 @@ if (isProfile || isStudio || isProject) {
   const confirmMsg = chrome.i18n.getMessage("captureCommentConfirm");
 
   window.addEventListener("load", () => {
-    const isScratchWww = Boolean(document.querySelector("meta[name='format-detection']"));
-    if (isProfile || (r2IsStudioComments && !isScratchWww)) {
+    if (isProfile) {
       window.addEventListener(
         "click",
         (e) => {
@@ -601,7 +590,7 @@ if (isProfile || isStudio || isProject) {
         },
         { capture: true }
       );
-    } else if (isProject || (isStudio && isScratchWww)) {
+    } else if (isProject || isStudio) {
       // For projects, we want to be careful not to hurt performance.
       // Let's capture the event in the comments container instead
       // of the whole window. There will be a new comment container
