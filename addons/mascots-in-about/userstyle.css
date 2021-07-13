@@ -1,13 +1,17 @@
-.video-container::before { /* The image  */
-    background-image: url(//cdn.scratch.mit.edu/scratchr2/static/images/help/spritesforcommunityguid.png); /* The image itself  */
-    width: 390px; height: 79px; /* Image size  */
-    background-size: 390px 79px; /* Background size  */
-    margin-left: 2.25%; margin-right: 2.25%;  /* Centering  */
-    content:""; /* For some reason this is needed for the image to display  */
-    display: block; /* This too  */
+.video-container::before {
+  /* The image  */
+  background-image: url(//cdn.scratch.mit.edu/scratchr2/static/images/help/spritesforcommunityguid.png); /* The image itself  */
+  width: 390px;
+  height: 79px; /* Image size  */
+  background-size: 390px 79px; /* Background size  */
+  margin-left: 2.25%;
+  margin-right: 2.25%; /* Centering  */
+  content: ""; /* For some reason this is needed for the image to display  */
+  display: block; /* This too  */
 }
 
-.video-container { /* Move the video up a bit just so it looks better  */
-    position: relative;
-    bottom: 79px;
+.video-container {
+  /* Move the video up a bit just so it looks better  */
+  position: relative;
+  bottom: 79px;
 }
