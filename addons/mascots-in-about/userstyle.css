@@ -1,14 +1,20 @@
-.video-container::before { /* The image  */
-    background-image: url(//cdn.scratch.mit.edu/scratchr2/static/images/help/spritesforcommunityguid.png); /* The image itself  */
-    width: 390px; height: 79px; /* Image size  */
-    background-size: 390px 79px; /* Background size  */
-    margin-left: 2.25%; margin-right: 2.25%;  /* Centering  */
-    content:""; /* For some reason this is needed for the image to display  */
-    display: block; /* This too  */
-    clip-path: inset(2px 0px); /* Crop it so it looks nicer */
-    position: relative; bottom: -2px; /* Also this */
+.video-container::before {
+  /* The image  */
+  background-image: url(//cdn.scratch.mit.edu/scratchr2/static/images/help/spritesforcommunityguid.png); /* The image itself  */
+  width: 390px;
+  height: 79px; /* Image size  */
+  background-size: 390px 79px; /* Background size  */
+  margin-left: 2.25%;
+  margin-right: 2.25%; /* Centering  */
+  content: ""; /* For some reason this is needed for the image to display  */
+  display: block; /* This too  */
+  clip-path: inset(2px 0px); /* Crop it so it looks nicer */
+  position: relative;
+  bottom: -2px; /* Also this */
 }
 
-.video-container { /* Move the video up a bit just so it looks better  */
-    position: relative; bottom: 79px;
+.video-container {
+  /* Move the video up a bit just so it looks better  */
+  position: relative;
+  bottom: 79px;
 }
