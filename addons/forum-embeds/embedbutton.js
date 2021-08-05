@@ -3,6 +3,12 @@ export default async function ({ addon, global, console, safeMsg }) {
 //Adds the embed button to the post editor toolbar.
 
 //Constants
+//Regexes (i tried using global but it just wouldn't work for some reason)
+const scratchProjectRegExp = /^scratch.mit.edu\/projects\/\d+(?:$|\/$)|embed(?:\/?)$/;
+const youTubeRegExp = /^(?:www\.)?youtube.com\/(?:watch\/?\?v=[0-9A-Za-z-_]+|embed\/[0-9A-Za-z-_]+)/;
+const youTubeDiscussRegExp = /^scratch.mit.edu\/discuss\/youtube\/[0-9A-Za-z-_]+/;
+const audioRegExp = /(?:\.ogg|\.mp3)|(?:\.wav)$/;
+const videoRegExp = /\.mp4|\.webm$/;
 //Elements (also simultaneously making sure that the editor exists)
 const textBox = await addon.tab.waitForElement("#id_body, #id_signature"); //Post editor textBox
 const linkButton = await addon.tab.waitForElement(".markItUpButton6"); //Link button (used to insert the button after the link button)
@@ -14,7 +20,7 @@ var embedButton = document.createElement("li");
 embedButton.className = "markItUpButton markItUpButton17";
 //The <a> element
 var embedButtonLink = document.createElement("a");
-embedButtonLink.textContent = safeMsg("embed-hover");
+embedButtonLink.textContent = safeMsg("embed-add-hover");
 embedButtonLink.title = safeMsg("embed-add-hover");
 embedButtonLink.style["background-image"] = embedIcon;
 embedButtonLink.id = "embedButton";
@@ -38,7 +44,7 @@ const addEmbedFunction = function() {
 			return;
 		}
 	}
-	if (global.scratchProjectRegExp.test(url.hostname + url.pathname) || global.youTubeRegExp.test(url.hostname + url.pathname + url.search) || global.youTubeDiscussRegExp.test(url.hostname + url.pathname) || global.audioRegExp.test(url.pathname) || global.videoRegExp.test(url.pathname)) { //Test for any of the regexes
+	if (scratchProjectRegExp.test(url.hostname + url.pathname) || youTubeRegExp.test(url.hostname + url.pathname + url.search) || youTubeDiscussRegExp.test(url.hostname + url.pathname) || audioRegExp.test(url.pathname) || videoRegExp.test(url.pathname)) { //Test for any of the regexes
 		//It's a valid link for embeds
 		var insertText = "[url=ex-embed][/url][url=" + url + "]" + safeMsg("embed-placeholder") + "[/url]"; //Prepare the text to add to the textbox
 		if (textBox.selectionStart === textBox.value.length && textBox.selectionEnd === textBox.value.length) { //Cursor is at the end

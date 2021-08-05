@@ -4,11 +4,11 @@ export default async function ({ addon, global, console, safeMsg }) {
 
 //Constants
 //Regexes
-const global.scratchProjectRegExp = /^scratch.mit.edu\/projects\/\d+(?:$|\/$)|embed(?:\/?)$/;
-const global.youTubeRegExp = /^(?:www\.)?youtube.com\/(?:watch\/?\?v=[0-9A-Za-z-_]+|embed\/[0-9A-Za-z-_]+)/;
-const global.youTubeDiscussRegExp = /^scratch.mit.edu\/discuss\/youtube\/[0-9A-Za-z-_]+/;
-const global.audioRegExp = /(?:\.ogg|\.mp3)|(?:\.wav)$/;
-const global.videoRegExp = /\.mp4|\.webm$/;
+const scratchProjectRegExp = /^scratch.mit.edu\/projects\/\d+(?:$|\/$)|embed(?:\/?)$/;
+const youTubeRegExp = /^(?:www\.)?youtube.com\/(?:watch\/?\?v=[0-9A-Za-z-_]+|embed\/[0-9A-Za-z-_]+)/;
+const youTubeDiscussRegExp = /^scratch.mit.edu\/discuss\/youtube\/[0-9A-Za-z-_]+/;
+const audioRegExp = /(?:\.ogg|\.mp3)|(?:\.wav)$/;
+const videoRegExp = /\.mp4|\.webm$/;
 
 //Loop
 while (true) {
@@ -23,7 +23,7 @@ while (true) {
 	//Embed types
 	//Scratch project
 	if (addon.settings.get("project")) {
-		if (global.scratchProjectRegExp.test(url.hostname + url.pathname)) {
+		if (scratchProjectRegExp.test(url.hostname + url.pathname)) {
 			embedElement = document.createElement("iframe");
 			embedElement.title = safeMsg("scratch-title");
 			embedElement.src = "https://scratch.mit.edu/projects/" + url.pathname.match(/\d+/g)[0] + "/embed/";
@@ -35,7 +35,7 @@ while (true) {
 	}
 	//Youtube video
 	if (addon.settings.get("youtube")) {
-		if (global.youTubeRegExp.test(url.hostname + url.pathname + url.search) || global.youTubeDiscussRegExp.test(url.hostname + url.pathname)) {
+		if (youTubeRegExp.test(url.hostname + url.pathname + url.search) || youTubeDiscussRegExp.test(url.hostname + url.pathname)) {
 			embedElement = document.createElement("iframe");
 			embedElement.title = safeMsg("youtube-title");
 			embedElement.src = "https://youtube.com/embed/" + (url.pathname + url.search).match(/(?:(?:embed\/|tch\?v=)|utube\/)[0-9A-Za-z-_]+/g)[0].substring(6) + "/?showinfo=0&rel=0";
@@ -47,7 +47,7 @@ while (true) {
 	}
 	//Audio file (ogg, mp3, wav)
 	if (addon.settings.get("audio")) {
-		if (global.audioRegExp.test(url.pathname)) {
+		if (audioRegExp.test(url.pathname)) {
 			embedElement = document.createElement("audio");
 			embedElement.title = safeMsg("audio-title");
 			embedElement.setAttribute("controls", "");
@@ -62,7 +62,7 @@ while (true) {
 	}
 	//Video file (mp4, webm)
 	if (addon.settings.get("video")) {
-		if (global.videoRegExp.test(url.pathname)) {
+		if (videoRegExp.test(url.pathname)) {
 			embedElement = document.createElement("video");
 			embedElement.title = safeMsg("video-title");
 			embedElement.setAttribute("controls", "");
