@@ -1,0 +1,10 @@
+{
+  "forum-embeds/scratch-title": "Scratch project embedded by the Scratch Addons browser extension",
+  "forum-embeds/youtube-title": "YouTube video embedded by the Scratch Addons browser extension",
+  "forum-embeds/audio-title": "Audio file embedded by the Scratch Addons browser extension",
+  "forum-embeds/video-title": "Video file embedded by the Scratch Addons browser extension",
+  "forum-embeds/embed-add-hover": "Add Embed",
+  "forum-embeds/embed-add-prompt": "Please enter a Scratch project, YouTube video, video file or audio file link.",
+  "forum-embeds/embed-add-error": "Invalid embed link.",
+  "forum-embeds/embed-placeholder": "Enter your embed link text..."
+}

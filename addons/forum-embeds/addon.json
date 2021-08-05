@@ -1,0 +1,56 @@
+{
+  "name": "Forum embeds",
+  "description": "Allows you to embed projects, audio and more in your forum posts. This works by adding a [url=ex-embed][/url] tag before your embed links.",
+  "userscripts": [
+    {
+      "url": "embeds.js",
+      "matches": ["https://scratch.mit.edu/discuss/topic/*", "https://scratch.mit.edu/discuss/post/*/edit", "https://scratch.mit.edu/discuss/settings/*"],
+	  "runAtComplete": false
+    },
+	{
+      "url": "embedbutton.js",
+      "matches": ["https://scratch.mit.edu/discuss/topic/*", "https://scratch.mit.edu/discuss/post/*/edit", "https://scratch.mit.edu/discuss/settings/*"],
+	  "runAtComplete": false
+    }
+  ],
+  "settings": [
+    {
+      "name": "Embed Scratch projects",
+      "id": "project",
+      "type": "boolean",
+      "default": true
+    },
+	{
+      "name": "Embed audio files",
+      "id": "audio",
+      "type": "boolean",
+      "default": true
+    },
+	{
+      "name": "Embed video files",
+      "id": "video",
+      "type": "boolean",
+      "default": true
+    },
+	{
+      "name": "Embed YouTube videos",
+      "id": "youtube",
+      "type": "boolean",
+      "default": true
+    }
+  ],
+  "credits": [
+    {
+      "name": "CST1229",
+      "link": "https://github.com/CST1229"
+    }
+  ],
+  "info": [
+    {
+      "type": "notice",
+      "text": "Users without this addon enabled will see normal links instead of embeds.",
+      "id": "normal-links"
+    }
+  ],
+  "tags": ["community", "forums"]
+}
