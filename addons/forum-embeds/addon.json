@@ -4,13 +4,21 @@
   "userscripts": [
     {
       "url": "embeds.js",
-      "matches": ["https://scratch.mit.edu/discuss/topic/*", "https://scratch.mit.edu/discuss/post/*/edit", "https://scratch.mit.edu/discuss/settings/*"],
-	  "runAtComplete": false
+      "matches": [
+        "https://scratch.mit.edu/discuss/topic/*",
+        "https://scratch.mit.edu/discuss/post/*/edit",
+        "https://scratch.mit.edu/discuss/settings/*"
+      ],
+      "runAtComplete": false
     },
-	{
+    {
       "url": "embedbutton.js",
-      "matches": ["https://scratch.mit.edu/discuss/topic/*", "https://scratch.mit.edu/discuss/post/*/edit", "https://scratch.mit.edu/discuss/settings/*"],
-	  "runAtComplete": false
+      "matches": [
+        "https://scratch.mit.edu/discuss/topic/*",
+        "https://scratch.mit.edu/discuss/post/*/edit",
+        "https://scratch.mit.edu/discuss/settings/*"
+      ],
+      "runAtComplete": false
     }
   ],
   "userstyles": [
