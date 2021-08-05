@@ -13,30 +13,10 @@
 	  "runAtComplete": false
     }
   ],
-  "settings": [
+  "userstyles": [
     {
-      "name": "Embed Scratch projects",
-      "id": "project",
-      "type": "boolean",
-      "default": true
-    },
-	{
-      "name": "Embed audio files",
-      "id": "audio",
-      "type": "boolean",
-      "default": true
-    },
-	{
-      "name": "Embed video files",
-      "id": "video",
-      "type": "boolean",
-      "default": true
-    },
-	{
-      "name": "Embed YouTube videos",
-      "id": "youtube",
-      "type": "boolean",
-      "default": true
+      "url": "userstyle.css",
+      "matches": ["https://scratch.mit.edu/discuss/topic/*", "https://scratch.mit.edu/discuss/post/*/edit", "https://scratch.mit.edu/discuss/settings/*"]
     }
   ],
   "credits": [
@@ -52,5 +32,8 @@
       "id": "normal-links"
     }
   ],
+  "dynamicEnable": true,
+  "dynamicDisable": true,
+  "injectAsStyleElt": true,
   "tags": ["community", "forums"]
 }
