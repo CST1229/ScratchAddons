@@ -2,14 +2,6 @@ export default async function ({ addon, global, console, safeMsg }) {
   //Adds the embed button to the post editor toolbar.
 
   //Constants
-  //Elements (also simultaneously making sure that the editor exists)
-  const textBox = await addon.tab.waitForElement("#id_body, #id_signature"); //Post editor textBox
-  const linkButton = await addon.tab.waitForElement(".markItUpButton6"); //Link button (used to insert the button after the link button)
-  //Images
-  const embedIcon =
-    'url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAPhJREFUOI1jYKAQMMIY9+/f/0+KRkVFRUa4Affv3/8vKyvLMP9CA1xBokEDw+lEU4b3V54wCOrIMJjOP41iwOPHjxkUFRUZmZAFf/79zfD8y304//2VJwxGZpwM7688wekSFnSBKpuFcLagjgzDuVMQF+ACKF7Yv38/ToXIwNHREe4FDBfAgIWFBQr/xIkTWNVhNcDCwoJhxc1Ohudf7jNI8igyPP9yn6HQYgZWQ5iw6GdgYGCAB+bzL/cZhDhxhwFOL3z4+Y1BSUANp0aCBnD84WGI16ohaABWL5w4cYKh0m4ahhhJLsClAa8Bjo6ORGlCBhRnJooBAIxiVSpSDkOkAAAAAElFTkSuQmCC")'; //Add Embed icon
-
-  //Constants
   //Regexes (i tried using global but it just wouldn't work for some reason)
   const scratchProjectRegExp = /^scratch.mit.edu\/projects\/\d+(?:$|\/$)|embed(?:\/?)$/;
   const youTubeRegExp = /^(?:www\.)?youtube.com\/(?:watch\/?\?v=[0-9A-Za-z-_]+|embed\/[0-9A-Za-z-_]+)/;
