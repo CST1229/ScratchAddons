@@ -6,8 +6,7 @@ export default async function ({ addon, global, console, safeMsg }) {
 //Regexes
 const global.scratchProjectRegExp = /^scratch.mit.edu\/projects\/\d+(?:$|\/$)|embed(?:\/?)$/;
 const global.youTubeRegExp = /^(?:www\.)?youtube.com\/(?:watch\/?\?v=[0-9A-Za-z-_]+|embed\/[0-9A-Za-z-_]+)/;
-const global.youTubeDiscussRegExp =
-/^scratch.mit.edu\/discuss\/youtube\/[0-9A-Za-z-_]+/;
+const global.youTubeDiscussRegExp = /^scratch.mit.edu\/discuss\/youtube\/[0-9A-Za-z-_]+/;
 const global.audioRegExp = /(?:\.ogg|\.mp3)|(?:\.wav)$/;
 const global.videoRegExp = /\.mp4|\.webm$/;
 
