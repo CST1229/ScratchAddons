@@ -1,6 +1,6 @@
 {
   "name": "Forum embeds",
-  "description": "Allows you to embed projects, audio and more in your forum posts. This works by adding a [url=ex-embed][/url] tag before your embed links.",
+  "description": "Allows you to embed projects, audio and video in your forum posts. This works by adding a [url=ex-embed][/url] tag before your embed links.",
   "userscripts": [
     {
       "url": "embeds.js",
