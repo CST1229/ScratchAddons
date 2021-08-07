@@ -43,7 +43,7 @@ export default async function ({ addon, global, console, safeMsg }) {
         "https://youtube.com/embed/" +
         (url.pathname + url.search).match(/(?:(?:embed\/|tch\?v=)|utube\/)[0-9A-Za-z-_]+/g)[0].substring(6) +
         "/?showinfo=0&rel=0";
-		embedElement.classList.add("sa-forum-yt-embed");
+      embedElement.classList.add("sa-forum-yt-embed");
 
       embedded = true;
     }
@@ -65,7 +65,7 @@ export default async function ({ addon, global, console, safeMsg }) {
       embedElement = document.createElement("video");
       embedElement.title = safeMsg("video-title");
       embedElement.setAttribute("controls", "");
-	  embedElement.classList.add("sa-forum-video-embed");
+      embedElement.classList.add("sa-forum-video-embed");
       //<source> element
       var sourceElement = document.createElement("source");
       sourceElement.src = url.href;
