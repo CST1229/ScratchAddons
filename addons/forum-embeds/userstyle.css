@@ -1,3 +1,23 @@
-.sa-embed-link {
+.sa-forum-embed-link { /* Links that get converted to embeds */
   display: none;
+}
+
+.sa-forum-embed { /* All embeds */
+	display: block;
+}
+.sa-forum-embed:not(:fullscreen) { /* All embeds when not in fullscren */
+	border: solid 2px #e0e0e0;
+}
+
+.sa-forum-video-embed, .sa-forum-audio-embed { /* Video and audio embeds */
+	width: calc(100% - 4px);
+	height: auto;
+}
+.sa-forum-yt-embed { /* YouTube video embeds */
+	width: 560px;
+	height: 315px;
+}
+.sa-forum-project-embed { /* Scratch project embeds */
+	width: 499px;
+	height: 416px;
 }

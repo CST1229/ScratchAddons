@@ -28,8 +28,7 @@ export default async function ({ addon, global, console, safeMsg }) {
       embedElement = document.createElement("iframe");
       embedElement.title = safeMsg("scratch-title");
       embedElement.src = "https://scratch.mit.edu/projects/" + url.pathname.match(/\d+/g)[0] + "/embed/";
-      embedElement.width = 499;
-      embedElement.height = 416;
+      embedElement.classList.add("sa-forum-project-embed");
 
       embedded = true;
     }
@@ -44,8 +43,7 @@ export default async function ({ addon, global, console, safeMsg }) {
         "https://youtube.com/embed/" +
         (url.pathname + url.search).match(/(?:(?:embed\/|tch\?v=)|utube\/)[0-9A-Za-z-_]+/g)[0].substring(6) +
         "/?showinfo=0&rel=0";
-      embedElement.width = 560;
-      embedElement.height = 315;
+		embedElement.classList.add("sa-forum-yt-embed");
 
       embedded = true;
     }
@@ -54,7 +52,7 @@ export default async function ({ addon, global, console, safeMsg }) {
       embedElement = document.createElement("audio");
       embedElement.title = safeMsg("audio-title");
       embedElement.setAttribute("controls", "");
-      embedElement.style.width = "calc(100% - 4px)";
+      embedElement.classList.add("sa-forum-audio-embed");
       //<source> element
       var sourceElement = document.createElement("source");
       sourceElement.src = url.href;
@@ -67,7 +65,7 @@ export default async function ({ addon, global, console, safeMsg }) {
       embedElement = document.createElement("video");
       embedElement.title = safeMsg("video-title");
       embedElement.setAttribute("controls", "");
-      embedElement.style.width = "calc(100% - 4px)";
+	  embedElement.classList.add("sa-forum-video-embed");
       //<source> element
       var sourceElement = document.createElement("source");
       sourceElement.src = url.href;
@@ -78,12 +76,11 @@ export default async function ({ addon, global, console, safeMsg }) {
     if (embedded) {
       //If the embedding is successful
       //Insert the embed
-      embedElement.style.border = "solid 2px #e0e0e0";
-      embedElement.style.display = "block";
+      embedElement.classList.add("sa-forum-embed");
       embedLink.parentNode.insertBefore(embedElement, embedLink);
       //Dynamic enable and disable
-      addon.tab.displayNoneWhileDisabled(embedElement, { display: "inline" });
-      embedLink.classList.add("sa-embed-link");
+      addon.tab.displayNoneWhileDisabled(embedElement, { display: "block" });
+      embedLink.classList.add("sa-forum-embed-link");
     }
   }
 }
