@@ -50,7 +50,8 @@ export default async function ({ addon, global, console, safeMsg }) {
         return;
       }
     }
-    if ( //Test for any of the regexes
+    if (
+      //Test for any of the regexes
       scratchProjectRegExp.test(url.hostname + url.pathname) ||
       youTubeRegExp.test(url.hostname + url.pathname + url.search) ||
       youTubeDiscussRegExp.test(url.hostname + url.pathname) ||
