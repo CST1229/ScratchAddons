@@ -50,14 +50,13 @@ export default async function ({ addon, global, console, safeMsg }) {
         return;
       }
     }
-    if (
+    if ( //Test for any of the regexes
       scratchProjectRegExp.test(url.hostname + url.pathname) ||
       youTubeRegExp.test(url.hostname + url.pathname + url.search) ||
       youTubeDiscussRegExp.test(url.hostname + url.pathname) ||
       audioRegExp.test(url.pathname) ||
       videoRegExp.test(url.pathname)
     ) {
-      //Test for any of the regexes
       //It's a valid link for embeds
       var insertText = "[url=ex-embed][/url][url=" + url + "]" + safeMsg("embed-placeholder") + "[/url]"; //Prepare the text to add to the textbox
       if (textBox.selectionStart === textBox.value.length && textBox.selectionEnd === textBox.value.length) {
