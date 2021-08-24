@@ -51,32 +51,32 @@ export default async function ({ addon, global, console, msg, safeMsg }) {
 
   const onFileUpload = (e) => {
     //when the input has a new file(s)
-	let doFileUpload = function(file) {
-		var extension = file.name.split(".").pop().toLowerCase();
-		var reader = new FileReader();
+    let doFileUpload = function (file) {
+      var extension = file.name.split(".").pop().toLowerCase();
+      var reader = new FileReader();
 
-		reader.readAsArrayBuffer(file);
+      reader.readAsArrayBuffer(file);
 
-		reader.onloadend = function () {
-		  uploadAssetImage(reader.result, extension);
-		};
+      reader.onloadend = function () {
+        uploadAssetImage(reader.result, extension);
+      };
 
-		reader.onerror = (err) => {
-		  alert(msg("load-error"));
-		  progresselement.remove();
-		  throw err;
-		};
-	};
-	var fileNum = 0;
-	let doFile = function() {
-		doFileUpload(uploadInput.files[fileNum]);
-		setTimeout(function() {
-			fileNum++;
-			if (!(fileNum < uploadInput.files.length)) return;
-			doFile();
-		}, 800);
-	};
-	doFile();
+      reader.onerror = (err) => {
+        alert(msg("load-error"));
+        progresselement.remove();
+        throw err;
+      };
+    };
+    var fileNum = 0;
+    let doFile = function () {
+      doFileUpload(uploadInput.files[fileNum]);
+      setTimeout(function () {
+        fileNum++;
+        if (!(fileNum < uploadInput.files.length)) return;
+        doFile();
+      }, 800);
+    };
+    doFile();
   };
 
   const onPaste = (e) => {
