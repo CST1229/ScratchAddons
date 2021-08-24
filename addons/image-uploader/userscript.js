@@ -51,7 +51,6 @@ export default async function ({ addon, global, console, msg, safeMsg }) {
 
   const onFileUpload = (e) => {
     //when the input has a new file(s)
-    //var file = uploadInput.files[0];
 	let doFileUpload = function(file) {
 		var extension = file.name.split(".").pop().toLowerCase();
 		var reader = new FileReader();
@@ -67,17 +66,17 @@ export default async function ({ addon, global, console, msg, safeMsg }) {
 		  progresselement.remove();
 		  throw err;
 		};
-	}
+	};
 	var fileNum = 0;
 	let doFile = function() {
 		doFileUpload(uploadInput.files[fileNum]);
 		setTimeout(function() {
-			if (uploadInput.files.length < 1) return;
-			uploadInput.files.shift();
 			fileNum++;
+			if (!(fileNum < uploadInput.files.length)) return;
 			doFile();
-		}, 1500);
+		}, 800);
 	};
+	doFile();
   };
 
   const onPaste = (e) => {
