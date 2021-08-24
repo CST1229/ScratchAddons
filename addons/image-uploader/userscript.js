@@ -15,6 +15,7 @@ export default async function ({ addon, global, console, msg, safeMsg }) {
 
   uploadInput.accept = "image/*";
   uploadInput.style.display = "none";
+  uploadInput.multiple = true;
 
   //button (the one the user interacts with)
   var inputButtonContainer = document.createElement("li");
@@ -49,22 +50,34 @@ export default async function ({ addon, global, console, msg, safeMsg }) {
   };
 
   const onFileUpload = (e) => {
-    //when the input has a new file
-    var file = uploadInput.files[0];
-    var extension = uploadInput.files[0].name.split(".").pop().toLowerCase();
-    var reader = new FileReader();
+    //when the input has a new file(s)
+    //var file = uploadInput.files[0];
+	let doFileUpload = function(file) {
+		var extension = file.name.split(".").pop().toLowerCase();
+		var reader = new FileReader();
 
-    reader.readAsArrayBuffer(file);
+		reader.readAsArrayBuffer(file);
 
-    reader.onloadend = function () {
-      uploadAssetImage(reader.result, extension);
-    };
+		reader.onloadend = function () {
+		  uploadAssetImage(reader.result, extension);
+		};
 
-    reader.onerror = (err) => {
-      alert(msg("load-error"));
-      progresselement.remove();
-      throw err;
-    };
+		reader.onerror = (err) => {
+		  alert(msg("load-error"));
+		  progresselement.remove();
+		  throw err;
+		};
+	}
+	var fileNum = 0;
+	let doFile = function() {
+		doFileUpload(uploadInput.files[fileNum]);
+		setTimeout(function() {
+			if (uploadInput.files.length < 1) return;
+			uploadInput.files.shift();
+			fileNum++;
+			doFile();
+		}, 1500);
+	};
   };
 
   const onPaste = (e) => {
