@@ -26,7 +26,7 @@ export default async function ({ addon, global, console, msg, safeMsg }) {
   inputButton.id = "uploadButton";
 
   let progresselement;
-  
+
   var fileNum; //file iterator
 
   inputButton.title = msg("upload-image");
@@ -34,11 +34,12 @@ export default async function ({ addon, global, console, msg, safeMsg }) {
     "url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABVUlEQVQ4jc3SO0tCYRzH8WcOegNtTb2BXkO1SNBuFyJqC1uihhqCNCIH8xKU8BzzcspQEskWC8IWcRCji8WxEnrSCKqh+dvQRTwcybZ+8J3+8Jn+QvyL2byHfDe9c7r/d8CdJlB5JVB5xeZOt10DcKV+gHazuVINQNi9iIUDizJfWdzsXhOQrDeXqOEz3vllvtbAngIgm822DKABJB6b27n/AeZST8zEqyylr4jmT3DsVi0A/a45rQxAOByme+2BzuUbRpOb3L4MIBbLSClNwHa5ua0SALFYDOeZTn/mnI6goke/pmvbsACCpUb+AsJfACASiTB1tULwfZF15Wb+eRDn27gFsHqE2Mh/5skhPDkANE2j/3iWseIkExcOhorD9F32moBh/4iwezEHIKVEKUWtVsMwDOr1OkopE9Bi34CUklAohK7rxONxotEomqa1Bfh++6QPwtgXjMvZERUAAAAASUVORK5CYII=')";
 
   inputButtonContainer.appendChild(inputButton);
-  
-  var doFile = function() { //function for uploading one file from the list
+
+  var doFile = function () {
+    //function for uploading one file from the list
     doFileUpload(uploadInput.files[fileNum]);
   };
-  var doFileUpload = function(file) {
+  var doFileUpload = function (file) {
     var extension = file.name.split(".").pop().toLowerCase();
     var reader = new FileReader();
 
@@ -54,7 +55,7 @@ export default async function ({ addon, global, console, msg, safeMsg }) {
       throw err;
     };
   };
-  
+
   //add it
   if (toolbar) {
     addon.tab.appendToSharedSpace({
@@ -212,10 +213,10 @@ export default async function ({ addon, global, console, msg, safeMsg }) {
       console.log(error);
       progresselement.remove();
     }
-	
-	//eh, just put more files logic here
-	fileNum++;
-	if (!(fileNum < uploadInput.files.length)) return;
-	doFile();
+
+    //eh, just put more files logic here
+    fileNum++;
+    if (!(fileNum < uploadInput.files.length)) return;
+    doFile();
   }
 }
