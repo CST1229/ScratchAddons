@@ -87,8 +87,8 @@ export default async function ({ addon, global, console, msg, safeMsg }) {
 
         reader.onloadend = function () {
           var extension = imageBlob.name.split(".").pop().toLowerCase();
-		  
-		  fileNum = 0;
+
+          fileNum = 0;
           uploadAssetImage(reader.result, extension, 1);
         };
 
@@ -126,8 +126,8 @@ export default async function ({ addon, global, console, msg, safeMsg }) {
 
       reader.onloadend = function () {
         var extension = file.name.split(".").pop().toLowerCase();
-        
-		fileNum = 0;
+
+        fileNum = 0;
         uploadAssetImage(reader.result, extension, 1);
       };
 
@@ -191,7 +191,7 @@ export default async function ({ addon, global, console, msg, safeMsg }) {
     var hash = md5(image);
     var type = fileType;
     console.log("type: " + fileType);
-    
+
     progresselement.innerText = msg("uploading") + " (" + (fileNum + 1) + "/" + fileCount + ")";
 
     try {
