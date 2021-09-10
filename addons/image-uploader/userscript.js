@@ -46,7 +46,7 @@ export default async function ({ addon, global, console, msg, safeMsg }) {
     reader.readAsArrayBuffer(file);
 
     reader.onloadend = function () {
-      uploadAssetImage(reader.result, extension);
+      uploadAssetImage(reader.result, extension, uploadInput.files.length);
     };
 
     reader.onerror = (err) => {
@@ -87,8 +87,9 @@ export default async function ({ addon, global, console, msg, safeMsg }) {
 
         reader.onloadend = function () {
           var extension = imageBlob.name.split(".").pop().toLowerCase();
-
-          uploadAssetImage(reader.result, extension);
+		  
+		  fileNum = 0;
+          uploadAssetImage(reader.result, extension, 1);
         };
 
         reader.onerror = (err) => {
@@ -125,8 +126,9 @@ export default async function ({ addon, global, console, msg, safeMsg }) {
 
       reader.onloadend = function () {
         var extension = file.name.split(".").pop().toLowerCase();
-
-        uploadAssetImage(reader.result, extension);
+        
+		fileNum = 0;
+        uploadAssetImage(reader.result, extension, 1);
       };
 
       reader.onerror = (err) => {
@@ -180,7 +182,7 @@ export default async function ({ addon, global, console, msg, safeMsg }) {
       callback(blob);
     }
   }
-  async function uploadAssetImage(image, fileType) {
+  async function uploadAssetImage(image, fileType, fileCount) {
     //this is the stuff that matters
     progresselement = toolbar.appendChild(document.createElement("li"));
     progresselement.className = "uploadStatus";
@@ -189,8 +191,8 @@ export default async function ({ addon, global, console, msg, safeMsg }) {
     var hash = md5(image);
     var type = fileType;
     console.log("type: " + fileType);
-
-    progresselement.innerText = msg("uploading");
+    
+    progresselement.innerText = msg("uploading") + "(" + (fileNum + 1) + "/" + fileCount + ")";
 
     try {
       var res = await fetch(`https://assets.scratch.mit.edu/${hash}.${type}`, {
