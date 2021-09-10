@@ -192,7 +192,7 @@ export default async function ({ addon, global, console, msg, safeMsg }) {
     var type = fileType;
     console.log("type: " + fileType);
     
-    progresselement.innerText = msg("uploading") + "(" + (fileNum + 1) + "/" + fileCount + ")";
+    progresselement.innerText = msg("uploading") + " (" + (fileNum + 1) + "/" + fileCount + ")";
 
     try {
       var res = await fetch(`https://assets.scratch.mit.edu/${hash}.${type}`, {
