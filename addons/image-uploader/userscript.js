@@ -35,10 +35,6 @@ export default async function ({ addon, global, console, msg, safeMsg }) {
 
   inputButtonContainer.appendChild(inputButton);
 
-  var doFile = function () {
-    //function for uploading one file from the list
-    doFileUpload(uploadInput.files[fileNum]);
-  };
   var doFileUpload = function (file) {
     var extension = file.name.split(".").pop().toLowerCase();
     var reader = new FileReader();
@@ -75,7 +71,7 @@ export default async function ({ addon, global, console, msg, safeMsg }) {
   const onFileUpload = (e) => {
     //when the input has a new file(s)
     fileNum = 0;
-    doFile();
+    doFileUpload(uploadInput.files[fileNum]);
   };
 
   const onPaste = (e) => {
@@ -87,8 +83,10 @@ export default async function ({ addon, global, console, msg, safeMsg }) {
 
         reader.onloadend = function () {
           var extension = imageBlob.name.split(".").pop().toLowerCase();
-
+          
           fileNum = 0;
+		  uploadInput.value = null; //make sure to clear
+		  //otherwise pasting after uploading multiple files would upload the other files too
           uploadAssetImage(reader.result, extension, 1);
         };
 
@@ -128,6 +126,8 @@ export default async function ({ addon, global, console, msg, safeMsg }) {
         var extension = file.name.split(".").pop().toLowerCase();
 
         fileNum = 0;
+		uploadInput.value = null; //make sure to clear
+		//otherwise dropping after uploading multiple files would upload the other files too
         uploadAssetImage(reader.result, extension, 1);
       };
 
@@ -138,6 +138,10 @@ export default async function ({ addon, global, console, msg, safeMsg }) {
       };
     }
   };
+  
+  const onDragOver = (e) => {
+	  e.preventDefault();
+  }
 
   function addListeners() {
     inputButton.addEventListener("click", onButtonClick);
@@ -147,6 +151,7 @@ export default async function ({ addon, global, console, msg, safeMsg }) {
     textBox.addEventListener("dragleave", onDragLeave);
     textBox.addEventListener("dragend", onDragEnd);
     textBox.addEventListener("drop", onDrop);
+	textBox.addEventListener("dragover", onDragOver);
   }
   function removeListeners() {
     inputButton.removeEventListener("click", onButtonClick);
@@ -156,6 +161,7 @@ export default async function ({ addon, global, console, msg, safeMsg }) {
     textBox.removeEventListener("dragleave", onDragLeave);
     textBox.removeEventListener("dragend", onDragEnd);
     textBox.removeEventListener("drop", onDrop);
+	textBox.removeEventListener("dragover", onDragOver);
   }
   addListeners();
   addon.self.addEventListener("disabled", () => removeListeners());
@@ -192,7 +198,7 @@ export default async function ({ addon, global, console, msg, safeMsg }) {
     var type = fileType;
     console.log("type: " + fileType);
 
-    progresselement.innerText = msg("uploading") + " (" + (fileNum + 1) + "/" + fileCount + ")";
+    progresselement.innerText = fileCount > 1 ? `${msg("uploading")} (${fileNum+1}/${fileCount})` : msg("uploading");
 
     try {
       var res = await fetch(`https://assets.scratch.mit.edu/${hash}.${type}`, {
@@ -219,6 +225,6 @@ export default async function ({ addon, global, console, msg, safeMsg }) {
     //eh, just put more files logic here
     fileNum++;
     if (!(fileNum < uploadInput.files.length)) return;
-    doFile();
+    doFileUpload(uploadInput.files[fileNum]);
   }
 }
