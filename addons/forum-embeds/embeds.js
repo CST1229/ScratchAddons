@@ -9,18 +9,16 @@ export default async function ({ addon, global, console, safeMsg }) {
   const audioRegExp = /(?:\.ogg|\.mp3)|(?:\.wav)$/;
   const videoRegExp = /\.mp4|\.webm$/;
 
-  //Loop
   while (true) {
-    //Get all embed urls
     var embedLink = await addon.tab.waitForElement(
       '.postmsg a[href="http://ex-embed"]+a, .postsignature a[href="http://ex-embed"]+a',
       {
         markAsSeen: true,
       }
     );
-    var url = new URL(embedLink.href); //URL of embed
-    var embedElement; //Embed element
-    var embedded = false; //If the embed creation is successful
+    var url = new URL(embedLink.href);
+    var embedElement;
+    var embedded = false;
 
     //Embed types
     //Scratch project
@@ -53,7 +51,6 @@ export default async function ({ addon, global, console, safeMsg }) {
       embedElement.title = safeMsg("audio-title");
       embedElement.setAttribute("controls", "");
       embedElement.classList.add("sa-forum-audio-embed");
-      //<source> element
       var sourceElement = document.createElement("source");
       sourceElement.src = url.href;
       embedElement.appendChild(sourceElement);
@@ -66,7 +63,6 @@ export default async function ({ addon, global, console, safeMsg }) {
       embedElement.title = safeMsg("video-title");
       embedElement.setAttribute("controls", "");
       embedElement.classList.add("sa-forum-video-embed");
-      //<source> element
       var sourceElement = document.createElement("source");
       sourceElement.src = url.href;
       embedElement.appendChild(sourceElement);
@@ -75,10 +71,8 @@ export default async function ({ addon, global, console, safeMsg }) {
     }
     if (embedded) {
       //If the embedding is successful
-      //Insert the embed
       embedElement.classList.add("sa-forum-embed");
       embedLink.parentNode.insertBefore(embedElement, embedLink);
-      //Dynamic enable and disable
       addon.tab.displayNoneWhileDisabled(embedElement, { display: "block" });
       embedLink.classList.add("sa-forum-embed-link");
     }
