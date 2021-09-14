@@ -120,29 +120,7 @@ export default async function ({ addon, global, console, msg, safeMsg }) {
     textBox.style.backgroundColor = "";
     console.log(e.dataTransfer);
 	uploadInput.files = e.dataTransfer.files; 
-    /*var file = e.dataTransfer.files[0];
-    if (file) {
-      e.preventDefault();
-      e.stopPropagation();
-
-      var reader = new FileReader();
-      reader.readAsArrayBuffer(file);
-
-      reader.onloadend = function () {
-        var extension = file.name.split(".").pop().toLowerCase();
-
-        fileNum = 0;
-        uploadInput.value = null; //make sure to clear
-        //otherwise dropping after uploading multiple files would upload the other files too
-        uploadAssetImage(reader.result, extension, 1);
-      };
-
-      reader.onerror = (err) => {
-        alert(msg("load-error"));
-        progresselement.remove();
-        throw err;
-      };
-    }*/
+	onFileUpload();
   };
 
   function addListeners() {
