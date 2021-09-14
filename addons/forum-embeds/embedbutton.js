@@ -25,9 +25,9 @@ export default async function ({ addon, global, console, safeMsg }) {
   embedButtonLink.id = "embedButton";
   embedButton.appendChild(embedButtonLink);
   addon.tab.appendToSharedSpace({
-	space: "forumToolbarLinkDecoration",
-	order: 0,
-	element: embedButton
+    space: "forumToolbarLinkDecoration",
+    order: 0,
+    element: embedButton,
   });
   addon.tab.displayNoneWhileDisabled(embedButton, { display: "inline" });
 
