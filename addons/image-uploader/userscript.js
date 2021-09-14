@@ -119,7 +119,8 @@ export default async function ({ addon, global, console, msg, safeMsg }) {
   const onDrop = (e) => {
     textBox.style.backgroundColor = "";
     console.log(e.dataTransfer);
-    var file = e.dataTransfer.files[0];
+	uploadInput.files = e.dataTransfer.files; 
+    /*var file = e.dataTransfer.files[0];
     if (file) {
       e.preventDefault();
       e.stopPropagation();
@@ -141,7 +142,7 @@ export default async function ({ addon, global, console, msg, safeMsg }) {
         progresselement.remove();
         throw err;
       };
-    }
+    }*/
   };
 
   function addListeners() {
