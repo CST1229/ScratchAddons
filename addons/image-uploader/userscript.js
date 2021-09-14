@@ -139,10 +139,6 @@ export default async function ({ addon, global, console, msg, safeMsg }) {
     }
   };
 
-  const onDragOver = (e) => {
-    e.preventDefault();
-  };
-
   function addListeners() {
     inputButton.addEventListener("click", onButtonClick);
     uploadInput.addEventListener("change", onFileUpload);
@@ -151,7 +147,6 @@ export default async function ({ addon, global, console, msg, safeMsg }) {
     textBox.addEventListener("dragleave", onDragLeave);
     textBox.addEventListener("dragend", onDragEnd);
     textBox.addEventListener("drop", onDrop);
-    textBox.addEventListener("dragover", onDragOver);
   }
   function removeListeners() {
     inputButton.removeEventListener("click", onButtonClick);
@@ -161,7 +156,6 @@ export default async function ({ addon, global, console, msg, safeMsg }) {
     textBox.removeEventListener("dragleave", onDragLeave);
     textBox.removeEventListener("dragend", onDragEnd);
     textBox.removeEventListener("drop", onDrop);
-    textBox.removeEventListener("dragover", onDragOver);
   }
   addListeners();
   addon.self.addEventListener("disabled", () => removeListeners());
