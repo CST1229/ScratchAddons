@@ -119,8 +119,8 @@ export default async function ({ addon, global, console, msg, safeMsg }) {
   const onDrop = (e) => {
     textBox.style.backgroundColor = "";
     console.log(e.dataTransfer);
-	uploadInput.files = e.dataTransfer.files; 
-	onFileUpload();
+    uploadInput.files = e.dataTransfer.files;
+    onFileUpload();
   };
 
   function addListeners() {
