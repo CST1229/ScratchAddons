@@ -100,8 +100,11 @@
   "block-cherry-picking",
   "hide-new-variables",
   "move-to-top-bottom",
+  "fullscreen",
   "echo-effect",
   "block-duplicate",
+  "disable-paste-offset",
+  "emoji-picker",
   "forum-embeds",
 
   "// NEW ADDONS ABOVE THIS ↑↑",
