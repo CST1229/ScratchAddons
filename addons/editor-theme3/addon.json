@@ -12,7 +12,6 @@
   ],
   "dynamicEnable": true,
   "dynamicDisable": true,
-  "updateUserstylesOnSettingsChange": true,
   "injectAsStyleElt": true,
   "versionAdded": "1.2.0",
   "userscripts": [
@@ -155,11 +154,11 @@
       ]
     },
 	{
-      "name": "3D block shading",
+      "name": "3D block shading (requires refresh)",
       "id": "bevels",
       "type": "boolean",
       "default": false
-    },
+    }
   ],
   "tags": ["editor", "theme", "codeEditor", "featured"],
   "enabledByDefault": false,
