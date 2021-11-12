@@ -12,6 +12,7 @@
   ],
   "dynamicEnable": true,
   "dynamicDisable": true,
+  "updateUserstylesOnSettingsChange": true,
   "injectAsStyleElt": true,
   "versionAdded": "1.2.0",
   "userscripts": [
@@ -24,6 +25,15 @@
     {
       "url": "theme3.css",
       "matches": ["projects"]
+    },
+	{
+      "url": "bevels.css",
+      "matches": ["projects"],
+	  "if": {
+        "settings": {
+          "bevels": true
+        }
+      }
     }
   ],
   "settings": [
@@ -143,7 +153,13 @@
           "name": "Colored on black background"
         }
       ]
-    }
+    },
+	{
+      "name": "3D block shading",
+      "id": "bevels",
+      "type": "boolean",
+      "default": false
+    },
   ],
   "tags": ["editor", "theme", "codeEditor", "featured"],
   "enabledByDefault": false,
@@ -166,7 +182,8 @@
         "Pen-color": "#0FBD8C",
         "sa-color": "#29BEB8",
         "input-color": "#FFFFFF",
-        "text": "white"
+        "text": "white",
+		"bevels": false
       }
     },
     {
@@ -187,7 +204,8 @@
         "Pen-color": "#0e9a6c",
         "sa-color": "#29beb8",
         "input-color": "#ffffff",
-        "text": "white"
+        "text": "white",
+		"bevels": true
       }
     },
     {
@@ -208,7 +226,8 @@
         "Pen-color": "#064734",
         "sa-color": "#166966",
         "input-color": "#202020",
-        "text": "white"
+        "text": "white",
+		"bevels": false
       }
     },
     {
@@ -229,7 +248,8 @@
         "Pen-color": "#0FBD8C",
         "sa-color": "#29BEB8",
         "input-color": "#202020",
-        "text": "colorOnBlack"
+        "text": "colorOnBlack",
+		"bevels": false
       }
     }
   ]
