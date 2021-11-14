@@ -1,0 +1,25 @@
+g
+	:not([data-argument-type^="text"])
+> .blocklyBlockBackground
+	:not([filter*="#blocklyReplacementGlowFilter"]) /* Blocks */ {
+    filter: url(filters.svg#blocks);
+}
+.blocklyDraggable[data-shapes="c-block c-1 hat"] > g[data-shapes="stack"] > .blocklyBlockBackground /* Don't shade custom block prototypes */ {
+    filter: none;
+}
+.blocklyPath[data-argument-type="boolean"]
+	:not([filter*="#blocklyReplacementGlowFilter"]), /* Boolean inputs */
+g[data-id="matrix"] > .blocklyBlockBackground
+	:not([filter*="#blocklyReplacementGlowFilter"]), /* micro:bit matrix inputs in the block palette */
+g[data-category="micro:bit"] > g > .blocklyBlockBackground
+	:not([filter*="#blocklyReplacementGlowFilter"])/* micro:bit matrix inputs  elsewhere*/ {
+    filter: url(filters.svg#inputs) !important;
+}
+g[data-argument-type^="text"] > .blocklyBlockBackground, /* Text and number inputs */
+.blocklyHtmlInput, /* Focused text and number inputs */
+g[data-argument-type="dropdown"] > .blocklyBlockBackground
+	:not([filter*="#blocklyReplacementGlowFilter"]), /* Most dropdowns */
+g[data-argument-type="variable"] > .blocklyBlockBackground, /* Some square ropdowns */
+g[data-argument-type="colour"] /* Color inputs */ {
+    filter: url(filters.svg#inputs-dark) !important;
+}

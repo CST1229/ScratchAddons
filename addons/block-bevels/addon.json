@@ -1,0 +1,21 @@
+{
+  "name": "3D block shading",
+  "description": "Makes blocks have shading, like Scratch 2.0.",
+  "credits": [
+    {
+      "name": "CST1229",
+      "link": "https://github.com/CST1229"
+    }
+  ],
+  "userstyles": [
+    {
+      "url": "userstyle.css",
+      "matches": ["projects"]
+    }
+  ],
+  "dynamicEnable": true,
+  "dynamicDisable": true,
+  "versionAdded": "1.23.0",
+  "tags": ["editor", "theme", "codeEditor"],
+  "enabledByDefault": false
+}

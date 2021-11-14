@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+	<filter id="blocks" x0="-50%" y0="-50%" height="200%" width="200%">
+		<feGaussianBlur in="SourceAlpha" stdDeviation="1 1" result="blur-1"/>
+		<feFlood in="undefined" flood-color="#fff" result="flood-2" flood-opacity="0.3"/>
+		<feOffset in="blur-1" result="offset-3" dx="1.25" dy="1"/>
+		<feComposite k2="1" k3="-1" operator="arithmetic" in="SourceAlpha" in2="offset-3" result="comp-4"/>
+		<feComposite operator="in" in="flood-2" in2="comp-4" result="comp-5"/>
+		<feFlood in="undefined" result="flood-6" flood-color="#0" flood-opacity="0.8"/>
+		<feOffset in="blur-1" result="offset-7" dx="-1.5" dy="-1.5"/>
+		<feComposite k2="1" k3="-1" operator="arithmetic" in="SourceAlpha" in2="offset-7" result="comp-8"/>
+		<feComposite operator="in" in="flood-6" in2="comp-8" result="comp-9"/>
+		<feMerge result="merge-10">
+			<feMergeNode in="SourceGraphic"/>
+			<feMergeNode in="comp-5"/>
+			<feMergeNode in="comp-9"/>
+		</feMerge>
+	</filter>
+	<filter id="inputs" x0="-50%" y0="-50%" height="200%" width="200%">
+		<feGaussianBlur in="SourceAlpha" stdDeviation="1 1" result="blur-1"/>
+		<feFlood in="undefined" result="flood-2" flood-color="#000" flood-opacity="0.5"/>
+		<feOffset in="blur-1" result="offset-3" dx="2" dy="2.5"/>
+		<feComposite k2="1" k3="-1" operator="arithmetic" in="SourceAlpha" in2="offset-3" result="comp-4"/>
+		<feComposite operator="in" in="flood-2" in2="comp-4" result="comp-5"/>
+		<feMerge result="merge-10">
+			<feMergeNode in="SourceGraphic"/>
+			<feMergeNode in="comp-5"/>
+		</feMerge>
+	</filter>
+	<filter id="inputs-dark" x0="-50%" y0="-50%" height="200%" width="200%">
+		<feGaussianBlur in="SourceAlpha" stdDeviation="1 1" result="blur-1"/>
+		<feFlood in="undefined" result="flood-2" flood-color="#000" flood-opacity="0.7"/>
+		<feOffset in="blur-1" result="offset-3" dx="2" dy="2.5"/>
+		<feComposite k2="1" k3="-1" operator="arithmetic" in="SourceAlpha" in2="offset-3" result="comp-4"/>
+		<feComposite operator="in" in="flood-2" in2="comp-4" result="comp-5"/>
+		<feMerge result="merge-10">
+			<feMergeNode in="SourceGraphic"/>
+			<feMergeNode in="comp-5"/>
+		</feMerge>
+	</filter>
+</svg>
