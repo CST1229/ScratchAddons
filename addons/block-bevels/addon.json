@@ -16,6 +16,13 @@
   "dynamicEnable": true,
   "dynamicDisable": true,
   "versionAdded": "1.23.0",
+  "info": [
+    {
+      "type": "notice",
+      "text": "Block dropdowns and empty Boolean block inputs will not be shaded if \"Customizable block colors\" is enabled.",
+      "id": "theme3Compat"
+    }
+  ],
   "tags": ["editor", "theme", "codeEditor"],
   "enabledByDefault": false
 }
