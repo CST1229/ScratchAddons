@@ -38,7 +38,15 @@ export default class DevTools {
   async init() {
     this.addContextMenus();
     while (true) {
-      const root = await this.addon.tab.waitForElement("ul[class*=gui_tab-list_]", { markAsSeen: true });
+      const root = await this.addon.tab.waitForElement("ul[class*=gui_tab-list_]", {
+        markAsSeen: true,
+        reduxEvents: [
+          "scratch-gui/mode/SET_PLAYER",
+          "fontsLoaded/SET_FONTS_LOADED",
+          "scratch-gui/locales/SELECT_LOCALE",
+        ],
+        reduxCondition: (state) => !state.scratchGui.mode.isPlayerOnly,
+      });
       this.initInner(root);
     }
   }
@@ -231,7 +239,7 @@ export default class DevTools {
     let myBlocks = [];
     let myBlocksByProcCode = {};
 
-    // todo - get blockyly from an svg???
+    // todo - get blockly from an svg???
 
     let wksp = this.utils.getWorkspace();
     let topBlocks = wksp.getTopBlocks();
@@ -622,7 +630,7 @@ export default class DevTools {
   }
 
   /**
-   * Badly Ophaned - might want to delete these!
+   * Badly Orphaned - might want to delete these!
    * @param topBlock
    * @returns {boolean}
    */
@@ -812,7 +820,7 @@ export default class DevTools {
   }
 
   /**
-   * Find all the evern broadcasters.
+   * Find all the event broadcasters.
    * @return {[{eventName:string, block:Block}]} Array of event names and blocks.
    */
   getCallsToEvents() {
@@ -2046,6 +2054,11 @@ export default class DevTools {
         field.setAttribute("id", option.option[1] + "-" + option.option[0]);
       } else {
         field.innerText = option.option[1]; // griffpatch - oops! option.option[1] not 0?
+      }
+
+      // Handle "stop other scripts in sprite"
+      if (option.option[1] === "other scripts in sprite") {
+        option.dom.querySelector("mutation").setAttribute("hasnext", "true");
       }
     }
 

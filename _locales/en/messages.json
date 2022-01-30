@@ -239,14 +239,14 @@
   "extensionHasUpdated": {
     "message": "Scratch Addons has updated to v$1"
   },
-  "extensionUpdateInfo1_v1_22": {
-    "message": "New addon: \"switch variables between 'For all sprites' and 'For this sprite only'\", which allows changing the scope of variables and lists and whether variables are stored in the cloud. Go to $1 to enable it."
+  "extensionUpdateInfo1_v1_24": {
+    "message": "New addon: \"customizable navigation bar\", which lets you choose a list of links to be displayed in the navigation bar. Go to $1 to enable it."
   },
   "scratchAddonsSettings": {
     "message": "Scratch Addons settings"
   },
-  "extensionUpdateInfo2_v1_22": {
-    "message": "Other new addons added this update are \"better editor comments\", \"two-column category menu\" and \"search bar on My Stuff\"."
+  "extensionUpdateInfo2_v1_24": {
+    "message": "Other new addons added this update are \"customizable block text style\", \"disable sprite wobble in sprite pane\" and \"search sprites by name\". In addition, the \"Scratch 2.0 → 3.0\" addon has been updated to match Scratch 3.0 more closely."
   },
   "notAffiliated": {
     "message": "Scratch Addons is not affiliated with Scratch."
@@ -255,13 +255,21 @@
     "message": "New!",
     "description": "Tag for addons. Singular."
   },
+  "updated": {
+    "message": "New features",
+    "description": "Tag for addons with new features. Singular."
+  },
+  "updatedWithSettings": {
+    "message": "New settings",
+    "description": "Tag for addons with new settings. Singular."
+  },
   "newGroup": {
-    "message": "Other new addons",
-    "description": "Used as a category name for new addons"
+    "message": "Other new addons and updates",
+    "description": "Used as a category name for new addons and updates"
   },
   "featuredNew": {
-    "message": "Featured new addons",
-    "description": "Used as a category name for featured new addons"
+    "message": "Featured new addons and updates",
+    "description": "Used as a category name for featured new addons and updates"
   },
   "enabled": {
     "message": "Enabled",

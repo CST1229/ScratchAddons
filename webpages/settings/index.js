@@ -103,7 +103,6 @@ let fuse;
       if (!addonManifest) continue;
       const permissionsRequired = addonManifest.permissions || [];
       const browserPermissionsRequired = permissionsRequired.filter((p) => browserLevelPermissions.includes(p));
-      console.log(addonId, permissionsRequired, browserPermissionsRequired);
       if (addonValue.enabled && browserPermissionsRequired.length) {
         pendingPermissions[addonId] = browserPermissionsRequired;
       } else {
@@ -122,7 +121,6 @@ let fuse;
         const granted = await promisify(chrome.permissions.request.bind(chrome.permissions))({
           permissions: Object.values(pendingPermissions).flat(),
         });
-        console.log(pendingPermissions, granted);
         Object.keys(pendingPermissions).forEach((addonId) => {
           addonsEnabled[addonId] = granted;
         });
@@ -195,6 +193,17 @@ let fuse;
         }
 
         if (!fuse) return [];
+        const addonListObjs = Object.values(
+          this.addonListObjs.reduce((acc, cur) => {
+            if (
+              !acc[cur.manifest._addonId] ||
+              (acc[cur.manifest._addonId] && cur.group.id !== "featuredNew" && cur.group.id !== "new")
+            ) {
+              acc[cur.manifest._addonId] = cur;
+            }
+            return acc;
+          }, Object.create(null))
+        );
         const fuseSearch = fuse.search(this.searchInput).sort((a, b) => {
           // Sort very good matches at the top no matter what
           if ((a.score < 0.1) ^ (b.score < 0.1)) return a.score < 0.1 ? -1 : 1;
@@ -202,10 +211,10 @@ let fuse;
           else return b.item._enabled - a.item._enabled;
         });
         const results = fuseSearch.map((result) =>
-          this.addonListObjs.find((obj) => obj.manifest._addonId === result.item._addonId)
+          addonListObjs.find((obj) => obj.manifest._addonId === result.item._addonId)
         );
-        for (const obj of this.addonListObjs) obj.matchesSearch = results.includes(obj);
-        return this.addonListObjs.sort((b, a) => results.indexOf(b) - results.indexOf(a));
+        for (const obj of addonListObjs) obj.matchesSearch = results.includes(obj);
+        return addonListObjs.sort((b, a) => results.indexOf(b) - results.indexOf(a));
       },
       version() {
         return chrome.runtime.getManifest().version;
@@ -296,7 +305,6 @@ let fuse;
         inputElem.addEventListener(
           "change",
           async (e) => {
-            console.log(e);
             const file = inputElem.files[0];
             if (!file) {
               inputElem.remove();
@@ -503,6 +511,15 @@ let fuse;
         }
       }
 
+      if (manifest.latestUpdate) {
+        const [extMajor, extMinor, _] = vue.version.split(".");
+        const [addonMajor, addonMinor, __] = manifest.latestUpdate.version.split(".");
+        if (extMajor === addonMajor && extMinor === addonMinor) {
+          manifest.tags.push(manifest.latestUpdate.newSettings?.length ? "updatedWithSettings" : "updated");
+          manifest._groups.push(manifest.latestUpdate.isMajor ? "featuredNew" : "new");
+        }
+      }
+
       // Sort tags to preserve consistent order
       const order = tags.map((obj) => obj.matchName);
       manifest.tags.sort((b, a) => order.indexOf(b) - order.indexOf(a));
@@ -551,7 +568,7 @@ let fuse;
       group.addonIds = group.addonIds
         .map((id) => vue.manifestsById[id])
         .sort((manifestA, manifestB) => {
-          for (const tag of order) {
+          for (const tag of group.customOrder || order) {
             const val = checkTag(tag, manifestA, manifestB);
             if (val !== null) return val;
           }
