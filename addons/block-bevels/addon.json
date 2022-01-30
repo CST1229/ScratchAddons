@@ -1,5 +1,5 @@
 {
-  "name": "3D block shading",
+  "name": "Block shading",
   "description": "Makes blocks have shading, like Scratch 2.0.",
   "credits": [
     {
@@ -15,7 +15,7 @@
   ],
   "dynamicEnable": true,
   "dynamicDisable": true,
-  "versionAdded": "1.23.0",
+  "versionAdded": "1.25.0",
   "info": [
     {
       "type": "notice",
