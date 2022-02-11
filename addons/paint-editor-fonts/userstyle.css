@@ -1,0 +1,8 @@
+.sa-font-dropdown-divider {
+	display: inline-block;
+	
+	border-top: solid 1px lightgray;
+	width: 100%;
+	
+	margin: 5px;
+}

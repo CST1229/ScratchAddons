@@ -1,0 +1,34 @@
+{
+  "$schema": "https://raw.githubusercontent.com/ScratchAddons/manifest-schema/dist/schema.json",
+  "name": "Custom fonts in costume editor",
+  "description": "todo",
+  "credits": [
+    {
+      "name": "CST1229",
+	  "link": "https://github.com/CST1229/"
+    }
+  ],
+  "tags": [
+    "editor",
+    "costumeEditor"
+  ],
+  "userscripts": [
+    {
+      "url": "userscript.js",
+      "matches": [
+        "projects"
+      ]
+    }
+  ],
+  "userstyles": [
+    {
+      "url": "userstyle.css",
+      "matches": [
+        "projects"
+      ]
+    }
+  ],
+  "versionAdded": "1.25.0",
+  "dynamicEnable": true,
+  "dynamicDisable": true
+}
