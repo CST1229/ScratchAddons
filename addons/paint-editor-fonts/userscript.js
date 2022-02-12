@@ -69,7 +69,7 @@ export default async function ({ addon, msg, global, console }) {
 		
 		customItems.appendChild(createDivider());
 		customItems.appendChild(createDropdownItem(
-			"custom",
+			"Custom",
 			null,
 			() => {setFont(prompt("Enter a font name..."))},
 			true
