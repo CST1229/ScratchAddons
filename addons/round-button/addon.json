@@ -1,0 +1,31 @@
+{
+  "$schema": "https://raw.githubusercontent.com/ScratchAddons/manifest-schema/dist/schema.json",
+  "name": "Costume editor round button",
+  "description": "Adds a button next to the Paste or Curved buttons in the costume editor that rounds all selected shapes, for making shapes like rounded rectangles.",
+  "credits": [
+    {
+      "name": "CST1229"
+    }
+  ],
+  "tags": [
+    "editor",
+	"costumeEditor"
+  ],
+  "userscripts": [
+    {
+      "url": "userscript.js",
+      "matches": [
+        "projects"
+      ]
+    }
+  ],
+  "userstyles": [
+    {
+      "url": "userstyle.css",
+      "matches": [
+        "projects"
+      ]
+    }
+  ],
+  "versionAdded": "1.30.0"
+}
