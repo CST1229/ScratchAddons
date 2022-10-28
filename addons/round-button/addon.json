@@ -7,24 +7,17 @@
       "name": "CST1229"
     }
   ],
-  "tags": [
-    "editor",
-	"costumeEditor"
-  ],
+  "tags": ["editor", "costumeEditor"],
   "userscripts": [
     {
       "url": "userscript.js",
-      "matches": [
-        "projects"
-      ]
+      "matches": ["projects"]
     }
   ],
   "userstyles": [
     {
       "url": "userstyle.css",
-      "matches": [
-        "projects"
-      ]
+      "matches": ["projects"]
     }
   ],
   "versionAdded": "1.30.0"
