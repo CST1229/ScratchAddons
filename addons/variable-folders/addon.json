@@ -1,0 +1,55 @@
+{
+  "$schema": "https://raw.githubusercontent.com/ScratchAddons/manifest-schema/dist/schema.json",
+  "name": "Variable folders",
+  "description": "Variable folders. VARIABLE. FOLDERS.",
+  "credits": [
+    {
+      "name": "CST1229",
+      "link": "https://github.com/CST1229"
+    }
+  ],
+  "info": [
+    {
+      "type": "notice",
+      "text": "Some project.json compression utilities might remove the variable folders.",
+      "id": "jsonCompression"
+    },
+    {
+      "text": "Variable folders.",
+      "id": "a"
+    },
+    {
+      "type": "notice",
+      "text": "Variable. Folders.",
+      "id": "b"
+    },
+    {
+      "type": "warning",
+      "text": "VARIABLE!!! FOLDERS!!!!!!!",
+      "id": "c"
+    }
+  ],
+  "tags": [
+    "editor",
+    "codeEditor"
+  ],
+  "userscripts": [
+    {
+      "url": "userscript.js",
+      "matches": [
+        "projects"
+      ]
+    }
+  ],
+  "userstyles": [
+    {
+      "url": "userstyle.css",
+      "matches": [
+        "projects"
+      ]
+    }
+  ],
+  "dynamicDisable": true,
+  "dynamicEnable": false,
+  "versionAdded": "1.32.0"
+}
