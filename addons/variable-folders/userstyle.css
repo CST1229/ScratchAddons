@@ -1,4 +1,4 @@
 .sa-variable-folder-indent {
-	stroke: var(--editorDarkMode-border, #c8c8c8);
-	fill: transparent;
+  stroke: var(--editorDarkMode-border, #c8c8c8);
+  fill: transparent;
 }
