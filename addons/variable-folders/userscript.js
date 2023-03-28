@@ -180,9 +180,7 @@ export default async function ({ addon, msg, safeMsg, console }) {
             block.workspace.refreshToolboxSelection_();
           },
         });
-        if (
-          alreadyInFolder
-        ) {
+        if (alreadyInFolder) {
           items.push({
             enabled: true,
             separator: false,
