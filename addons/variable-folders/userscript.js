@@ -305,7 +305,7 @@ export default async function ({ addon, msg, safeMsg, console }) {
 
   const oldCreateCheckbox = ScratchBlocks.VerticalFlyout.prototype.createCheckbox_;
   ScratchBlocks.VerticalFlyout.prototype.ACTUAL_CHECKBOX_SIZE = ScratchBlocks.VerticalFlyout.prototype.CHECKBOX_SIZE;
-  ScratchBlocks.VerticalFlyout.prototype.INDENT_WIDTH = 32;
+  ScratchBlocks.VerticalFlyout.prototype.INDENT_WIDTH = 30;
   ScratchBlocks.VerticalFlyout.prototype.INDENT_START = ScratchBlocks.VerticalFlyout.prototype.ACTUAL_CHECKBOX_SIZE / 2;
   ScratchBlocks.VerticalFlyout.prototype.createCheckbox_ = function (block, cursorX, cursorY, blockHW) {
     const inFolder = !!block.saInFolder;
