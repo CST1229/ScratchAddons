@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/ScratchAddons/manifest-schema/dist/schema.json",
   "name": "Variable folders",
-  "description": "Variable folders. VARIABLE. FOLDERS.",
+  "description": "Adds folders to the Variables and Lists categories. To create a folder, right click any variable and click \"Add to folder\". Click a folder to open or close it. Right click a variable in a folder to move it to another folder or remove it from its folder. This feature works by adding a comment to your sprites containing the folder data.",
   "credits": [
     {
       "name": "CST1229",
@@ -11,42 +11,26 @@
   "info": [
     {
       "type": "notice",
-      "text": "Some project.json compression utilities might remove the variable folders.",
-      "id": "jsonCompression"
-    },
-    {
-      "text": "Variable folders.",
-      "id": "a"
+      "text": "Users with this addon enabled will be able to see the folders in your project. Anyone else will see variable lists normally (no folders).",
+      "id": "nonSAUsers"
     },
     {
       "type": "notice",
-      "text": "Variable. Folders.",
-      "id": "b"
-    },
-    {
-      "type": "warning",
-      "text": "VARIABLE!!! FOLDERS!!!!!!!",
-      "id": "c"
+      "text": "Some project.json compression utilities might remove the variable folders.",
+      "id": "jsonCompression"
     }
   ],
-  "tags": [
-    "editor",
-    "codeEditor"
-  ],
+  "tags": ["editor", "codeEditor"],
   "userscripts": [
     {
       "url": "userscript.js",
-      "matches": [
-        "projects"
-      ]
+      "matches": ["projects"]
     }
   ],
   "userstyles": [
     {
       "url": "userstyle.css",
-      "matches": [
-        "projects"
-      ]
+      "matches": ["projects"]
     }
   ],
   "injectAsStyleElt": true,

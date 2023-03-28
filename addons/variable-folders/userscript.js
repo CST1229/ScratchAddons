@@ -155,10 +155,15 @@ export default async function ({ addon, msg, safeMsg, console }) {
 
       const variable = block.workspace.getVariableById(block.getVars()[0]);
       if (variable) {
+        const data = getFoldersData(!variable.isLocal);
+        const alreadyInFolder = Object.values(data).find(
+          (o) => o.variables && Array.isArray(o.variables) && o.variables.includes(variable.getId())
+        );
+
         items.push({
           enabled: true,
           separator: true,
-          text: "Add to folder",
+          text: alreadyInFolder ? "Move to other folder" : "Add to folder",
           callback: () => {
             const folder = prompt("Folder to add to:");
             if (folder === null) return;
@@ -175,11 +180,8 @@ export default async function ({ addon, msg, safeMsg, console }) {
             block.workspace.refreshToolboxSelection_();
           },
         });
-        const data = getFoldersData(!variable.isLocal);
         if (
-          Object.values(data).find(
-            (o) => o.variables && Array.isArray(o.variables) && o.variables.includes(variable.getId())
-          )
+          alreadyInFolder
         ) {
           items.push({
             enabled: true,
