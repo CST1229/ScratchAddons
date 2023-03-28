@@ -29,24 +29,17 @@
       "id": "c"
     }
   ],
-  "tags": [
-    "editor",
-    "codeEditor"
-  ],
+  "tags": ["editor", "codeEditor"],
   "userscripts": [
     {
       "url": "userscript.js",
-      "matches": [
-        "projects"
-      ]
+      "matches": ["projects"]
     }
   ],
   "userstyles": [
     {
       "url": "userstyle.css",
-      "matches": [
-        "projects"
-      ]
+      "matches": ["projects"]
     }
   ],
   "injectAsStyleElt": true,
