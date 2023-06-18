@@ -7,6 +7,7 @@ export default async function ({ addon, msg, safeMsg, console }) {
   const LAST_LINE_REGEX = /(?:\n|^).*\n*$/;
 
   const COMMENT_MARKER = " // _variable_folders_";
+  // TODO: l10n
   const COMMENT_HEADER = `This comment contains configuration for variable folders in third-party editors\nYou can move, resize and collapse this comment, but do not edit it by hand`;
 
   // Gets the comment where folder data is stored.
@@ -159,27 +160,35 @@ export default async function ({ addon, msg, safeMsg, console }) {
         const alreadyInFolder = Object.values(data).find(
           (o) => o.variables && Array.isArray(o.variables) && o.variables.includes(variable.getId())
         );
+        
+        // TODO: l10n
+        const menuText = alreadyInFolder ? "Move to other folder" : "Add to folder";
+        const modalCaption = alreadyInFolder ? "Move to Other Folder" : "Add to Folder";
+        const modalMessage = alreadyInFolder ? "Folder to move to:" : "Folder to add to:";
 
         items.push({
           enabled: true,
           separator: true,
-          text: alreadyInFolder ? "Move to other folder" : "Add to folder",
+          text: menuText,
           callback: () => {
-            const folder = prompt("Folder to add to:");
-            if (folder === null) return;
-            const data = getFoldersData(!variable.isLocal);
-            for (const folder of Object.values(data)) {
-              if (!folder) continue;
-              if (folder.variables && Array.isArray(folder.variables)) {
-                folder.variables = folder.variables.filter((id) => id !== variable.getId());
+            ScratchBlocks.prompt(modalMessage, "", (folder) => {
+              if (!folder) return;
+              const data = getFoldersData(!variable.isLocal);
+              for (const folder of Object.values(data)) {
+                if (!folder) continue;
+                if (folder.variables && Array.isArray(folder.variables)) {
+                  folder.variables = folder.variables.filter((id) => id !== variable.getId());
+                }
               }
-            }
-            if (!data[folder]) data[folder] = { variables: [], collapsed: true };
-            data[folder].variables.push(variable.getId());
-            setFoldersData(!variable.isLocal, data);
-            block.workspace.refreshToolboxSelection_();
+              if (!data[folder]) data[folder] = { variables: [], collapsed: true };
+              data[folder].variables.push(variable.getId());
+              setFoldersData(!variable.isLocal, data);
+              block.workspace.refreshToolboxSelection_();
+            // The broadcast variable type has no extra buttons, so we use it
+            }, modalCaption, "broadcast_msg");
           },
         });
+        // TODO: l10n
         if (alreadyInFolder) {
           items.push({
             enabled: true,
@@ -209,25 +218,25 @@ export default async function ({ addon, msg, safeMsg, console }) {
 
   const RIGHT = "▶︎";
   const DOWN = "▼";
-
+  
   ScratchBlocks.FlyoutButton = class SAFlyoutButton extends ScratchBlocks.FlyoutButton {
     constructor(workspace, targetWorkspace, xml, isLabel) {
       super(workspace, targetWorkspace, xml, xml.hasAttribute("sa-folder-name") ? true : isLabel);
 
       if (xml.hasAttribute("sa-folder-name")) {
         this.saFolderButton = true;
-        const folderName = xml.getAttribute("sa-folder-name") || "";
+        this.saFolderName = xml.getAttribute("sa-folder-name") || "";
         this.callback_ = () => {
           const data = getFoldersData(false);
           const globalData = getFoldersData(true);
-          if (data[folderName]) {
-            this.saCollapsed = !data[folderName].collapsed;
-            data[folderName].collapsed = !data[folderName].collapsed;
+          if (data[this.saFolderName]) {
+            this.saCollapsed = !data[this.saFolderName].collapsed;
+            data[this.saFolderName].collapsed = !data[this.saFolderName].collapsed;
             setFoldersData(false, data);
           }
-          if (globalData[folderName]) {
-            this.saCollapsed = !globalData[folderName].collapsed;
-            globalData[folderName].collapsed = !globalData[folderName].collapsed;
+          if (globalData[this.saFolderName]) {
+            this.saCollapsed = !globalData[this.saFolderName].collapsed;
+            globalData[this.saFolderName].collapsed = !globalData[this.saFolderName].collapsed;
             setFoldersData(true, globalData);
           }
           targetWorkspace.refreshToolboxSelection_();
@@ -236,11 +245,12 @@ export default async function ({ addon, msg, safeMsg, console }) {
         const data = getFoldersData(false);
         const globalData = getFoldersData(true);
         this.saCollapsed = false;
-        if (data[folderName] && data[folderName].collapsed) this.saCollapsed = true;
-        if (globalData[folderName] && globalData[folderName].collapsed) this.saCollapsed = true;
+        if (data[this.saFolderName] && data[this.saFolderName].collapsed) this.saCollapsed = true;
+        if (globalData[this.saFolderName] && globalData[this.saFolderName].collapsed) this.saCollapsed = true;
       }
 
       this.isLabel_ = isLabel;
+      this.saMouseDownWrapper_ = null;
     }
 
     addTextSvg(isLabel) {
@@ -289,7 +299,86 @@ export default async function ({ addon, msg, safeMsg, console }) {
       svgText.setAttribute("x", this.width / 2);
       svgText.setAttribute("y", this.height / 2);
     }
+
+    createDom() {
+      const group = super.createDom();
+      this.saMouseDownWrapper_ = ScratchBlocks.bindEventWithChecks_(this.svgGroup_, 'mousedown',
+          this, this.onSAMouseDown_);
+      return group;
+    }
+
+    onSAMouseDown_(e) {
+      if (!ScratchBlocks.utils.isRightButton(e)) return;
+      // The flyout listens for a mousedown gesture, which removes our context menu.
+      // Workaround this by creating it a bit later
+      setTimeout(() => {
+        const menuOptions = [];
+
+        menuOptions.push({
+          text: "Rename folder",
+          enabled: true,
+          callback: () => {
+            // TODO: l10n
+            ScratchBlocks.prompt("Rename this folder to:", this.saFolderName, (newName) => {
+              if (!newName) return;
+    
+              const folderName = this.saFolderName;
+              const data = getFoldersData(false);
+              const globalData = getFoldersData(true);
+              if (data[folderName]) {
+                data[newName] = data[folderName];
+                delete data[folderName];
+                setFoldersData(false, data);
+              }
+              if (globalData[folderName]) {
+                globalData[newName] = globalData[folderName];
+                delete globalData[folderName];
+                setFoldersData(true, globalData);
+              }
+              this.saFolderName = newName;
+              this.workspace_.refreshToolboxSelection_();
+            // The broadcast variable type has no extra buttons, so we use it
+            // TODO: l10n
+            }, "Rename Folder", "broadcast_msg");
+          }
+        });
+
+        // TODO: l10n
+        menuOptions.push({
+          text: "Delete folder",
+          enabled: true,
+          callback: () => {
+            // "Deleting" the folder ungroups all variables from the folder;
+            // it doesn't delete all variables that are in the folder
+            const folderName = this.saFolderName;
+            const data = getFoldersData(false);
+            const globalData = getFoldersData(true);
+            if (data[folderName]) {
+              delete data[folderName];
+              setFoldersData(false, data);
+            }
+            if (globalData[folderName]) {
+              delete globalData[folderName];
+              setFoldersData(true, globalData);
+            }
+            this.workspace_.refreshToolboxSelection_();
+          }
+        });
+
+        ScratchBlocks.ContextMenu.show(e, menuOptions, this.workspace_.RTL, true);
+        ScratchBlocks.ContextMenu.currentBlock = null;
+      }, 1);
+    }
+
+    dispose() {
+      if (this.saMouseDownWrapper_) {
+        ScratchBlocks.unbindEvent_(this.saMouseDownWrapper_);
+      }
+      return super.dispose();
+    }
   };
+
+  window.ScratchBlocks = ScratchBlocks;
 
   const oldDomToBlock = ScratchBlocks.Xml.domToBlock;
   ScratchBlocks.Xml.domToBlock = function (xmlBlock, workspace) {

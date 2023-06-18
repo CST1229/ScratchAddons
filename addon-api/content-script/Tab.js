@@ -724,8 +724,10 @@ export default class Tab extends Listenable {
 
     this.traps.getBlockly().then((ScratchBlocks) => {
       const oldShow = ScratchBlocks.ContextMenu.show;
-      ScratchBlocks.ContextMenu.show = function (event, items, rtl) {
+      ScratchBlocks.ContextMenu.show = function (event, items, rtl, overrideAddon) {
         const gesture = ScratchBlocks.mainWorkspace.currentGesture_;
+        // "Artificial" context menu, e.g one created by an addon
+        if (!gesture || overrideAddon) return oldShow.call(this, event, items, rtl);
         const block = gesture.targetBlock_;
 
         for (const { callback, workspace, blocks, flyout, comments } of contextMenuCallbacks) {
