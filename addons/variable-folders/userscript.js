@@ -1,4 +1,4 @@
-import { init, callbacks, SMALL_GAP, BIG_GAP } from "../data-category-tweaks-v2/module.js";
+import { init, callbacks, SMALL_GAP, BIG_GAP, sharedData } from "../data-category-tweaks-v2/module.js";
 
 export default async function ({ addon, msg, safeMsg, console }) {
   const ScratchBlocks = await addon.tab.traps.getBlockly();
@@ -10,14 +10,14 @@ export default async function ({ addon, msg, safeMsg, console }) {
   // TODO: l10n
   const COMMENT_HEADER = `This comment contains configuration for variable folders in third-party editors\nYou can move, resize and collapse this comment, but do not edit it by hand`;
 
-  // Gets the comment where folder data is stored.
+  // gets the comment where folder data is stored
   const getFoldersComment = (forStage) => {
     const target = forStage ? vm.runtime.getTargetForStage() : vm.editingTarget;
     if (!target) return null;
     return Object.values(target.comments).find((c) => c.text.endsWith(COMMENT_MARKER));
   };
-  // Creates a folder data comment if it doesn't already exist,
-  // and returns it.
+  // creates a folder data comment if it doesn't already exist
+  // and returns it
   const createFoldersComment = (forStage) => {
     const target = forStage ? vm.runtime.getTargetForStage() : vm.editingTarget;
     if (!target) return null;
@@ -64,8 +64,7 @@ export default async function ({ addon, msg, safeMsg, console }) {
     comment.text = comment.text.replace(LAST_LINE_REGEX, `\n${JSON.stringify(data)}${COMMENT_MARKER}`);
   };
 
-  const getFolderForVar = (id) => {
-    const workspace = ScratchBlocks.getMainWorkspace();
+  const getFolderForVar = (id, workspace) => {
     const v = workspace.getVariableById(id);
     if (!v) return null;
     const local = v.isLocal;
@@ -81,67 +80,111 @@ export default async function ({ addon, msg, safeMsg, console }) {
     return null;
   };
 
-  // Process the data category and add folders into it.
-  const turnIntoFolders = (vars) => {
+  // process the data category and add folders into it
+  const turnIntoFolders = (vars, ws) => {
     if (!addon || addon.self.disabled) {
       return vars;
     }
 
-    const makeButtonFor = (text) => {
+    const makeButtonFor = (text, isLocal, isGlobal) => {
       const label = document.createElement("button");
       label.setAttribute("text", text);
       label.setAttribute("sa-folder-name", text);
+      label.setAttribute("sa-local-folder", isLocal);
+      label.setAttribute("sa-global-folder", isGlobal);
       return label;
     };
 
     const folders = {};
+    const localFolders = {};
+    const localNotInFolder = [];
     const notInFolder = [];
 
     const data = getFoldersData(false);
     const globalData = getFoldersData(true);
 
     for (const el of vars) {
+      // is a variable reporter
       if (el.hasAttribute("id")) {
-        const folder = getFolderForVar(el.getAttribute("id"));
+        const id = el.getAttribute("id");
+        const folder = getFolderForVar(id, ws);
+
+        const local = ws.getVariableById(id).isLocal;
+        const consideredLocal = !sharedData.separateLocalVariables || local;
+        const consideredGlobal = !sharedData.separateLocalVariables || !local;
+
         if (folder === null) {
-          notInFolder.push(el);
-        } else {
-          if (!(folder in folders)) folders[folder] = { vars: [], collapsed: false };
-          if (data[folder]) folders[folder].collapsed = data[folder].collapsed;
-          if (globalData[folder]) {
-            folders[folder].collapsed = folders[folder].collapsed || globalData[folder].collapsed;
+          if (local && sharedData.separateLocalVariables) {
+            localNotInFolder.push(el);
+          } else {
+            notInFolder.push(el);
           }
-          folders[folder].vars.push(el);
+        } else {
+          const foldersObj = sharedData.separateLocalVariables ? (
+            local ? localFolders : folders
+          ) : folders;
+          if (!(folder in foldersObj)) foldersObj[folder] = { vars: [], collapsed: false };
+          if (consideredLocal && data[folder]) foldersObj[folder].collapsed =
+            foldersObj[folder].collapsed || data[folder].collapsed;
+          if (consideredGlobal && globalData[folder]) foldersObj[folder].collapsed =
+            foldersObj[folder].collapsed || globalData[folder].collapsed;
+          foldersObj[folder].vars.push(el);
         }
       }
     }
 
     let newCat = [];
-    let addedVars = false;
-    for (const el of vars) {
-      if (el.hasAttribute("id") || el.tagName === "LABEL") {
-        if (!addedVars) {
-          addedVars = true;
-          for (const folder in folders) {
-            newCat.push(makeButtonFor(folder));
-            if (!folders[folder].collapsed) {
-              for (const v of folders[folder].vars) {
-                newCat.push(v);
-                v.setAttribute("gap", SMALL_GAP);
-                v.setAttribute("sa-in-folder", "");
-                if (folders[folder].vars[0] === v) v.setAttribute("sa-first-in-folder", "");
-              }
-            }
+    const pushFolders = (foldersObj, isLocal, isGlobal) => {
+      for (const folder in foldersObj) {
+        newCat.push(makeButtonFor(folder, isLocal, isGlobal));
+        if (!foldersObj[folder].collapsed) {
+          for (const v of foldersObj[folder].vars) {
+            newCat.push(v);
+            v.setAttribute("gap", SMALL_GAP);
+            v.setAttribute("sa-in-folder", "");
+            if (foldersObj[folder].vars[0] === v) v.setAttribute("sa-first-in-folder", "");
           }
-          newCat = newCat.concat(notInFolder);
-
-          const sep = document.createElement("sep");
-          sep.setAttribute("gap", BIG_GAP);
-          newCat.push(sep);
         }
-      } else {
-        newCat.push(el);
       }
+    };
+    for (const el of Object.values(vars)) {
+      // variable reporter. we add those ourselves
+      if (el.hasAttribute("id")) {
+        continue;
+      }
+
+      // create variable button.
+      // add the folders and variables after this
+      // if local variables aren't separated
+      if (
+        !sharedData.separateLocalVariables &&
+        el.hasAttribute("callbackkey")
+      ) {
+        newCat.push(el);
+        pushFolders(folders, true, true);
+
+        newCat = newCat.concat(notInFolder);
+        const lastEl = newCat[newCat.length - 1];
+        if (lastEl) lastEl.setAttribute("gap", BIG_GAP);
+        continue;
+      }
+
+      // separation label added by data category tweaks.
+      // add this label, then the scope's variables
+      if (el.tagName === "LABEL" && el.hasAttribute("data")) {
+        newCat.push(el);
+        const local = el.getAttribute("data") === "for-this-sprite-only";
+        if (local) {
+          pushFolders(localFolders, true, false);
+          newCat = newCat.concat(localNotInFolder);
+        } else {
+          pushFolders(folders, false, true);
+          newCat = newCat.concat(notInFolder);
+        }
+        continue;
+      }
+
+      newCat.push(el);
     }
     return newCat;
   };
@@ -164,7 +207,7 @@ export default async function ({ addon, msg, safeMsg, console }) {
         // TODO: l10n
         const menuText = alreadyInFolder ? "Move to other folder" : "Add to folder";
         const modalCaption = alreadyInFolder ? "Move to Other Folder" : "Add to Folder";
-        const modalMessage = alreadyInFolder ? "Folder to move to:" : "Folder to add to:";
+        const modalMessage = alreadyInFolder ? "Folder to move to: (max 50 characters)" : "Folder to add to: (max 50 characters)";
 
         items.push({
           enabled: true,
@@ -174,8 +217,9 @@ export default async function ({ addon, msg, safeMsg, console }) {
             ScratchBlocks.prompt(
               modalMessage,
               "",
-              (folder) => {
-                if (!folder) return;
+              (_folder) => {
+                if (!_folder) return;
+                const folder = _folder.substring(0, 50);
                 const data = getFoldersData(!variable.isLocal);
                 for (const folder of Object.values(data)) {
                   if (!folder) continue;
@@ -187,9 +231,9 @@ export default async function ({ addon, msg, safeMsg, console }) {
                 data[folder].variables.push(variable.getId());
                 setFoldersData(!variable.isLocal, data);
                 block.workspace.refreshToolboxSelection_();
-                // The broadcast variable type has no extra buttons, so we use it
               },
               modalCaption,
+              // the broadcast variable type has no extra buttons, so we use it
               "broadcast_msg"
             );
           },
@@ -232,27 +276,42 @@ export default async function ({ addon, msg, safeMsg, console }) {
       if (xml.hasAttribute("sa-folder-name")) {
         this.saFolderButton = true;
         this.saFolderName = xml.getAttribute("sa-folder-name") || "";
+
+        // these variables are used for seeing which folders to modify,
+        // if there are folders with the same name in the stage and sprite
+        // (if separate local variables is enabled, local and global folders
+        // are separated, otherwise they are merged)
+        this.saLocalFolder = xml.getAttribute("sa-local-folder") === "true";
+        this.saGlobalFolder = xml.getAttribute("sa-global-folder") === "true";
         this.callback_ = () => {
-          const data = getFoldersData(false);
-          const globalData = getFoldersData(true);
-          if (data[this.saFolderName]) {
-            this.saCollapsed = !data[this.saFolderName].collapsed;
-            data[this.saFolderName].collapsed = !data[this.saFolderName].collapsed;
-            setFoldersData(false, data);
+          if (this.saLocalFolder) {
+            const data = getFoldersData(false);
+            if (data[this.saFolderName]) {
+              this.saCollapsed = !data[this.saFolderName].collapsed;
+              data[this.saFolderName].collapsed = !data[this.saFolderName].collapsed;
+              setFoldersData(false, data);
+            }
           }
-          if (globalData[this.saFolderName]) {
-            this.saCollapsed = !globalData[this.saFolderName].collapsed;
-            globalData[this.saFolderName].collapsed = !globalData[this.saFolderName].collapsed;
-            setFoldersData(true, globalData);
+          if (this.saGlobalFolder) {
+            const globalData = getFoldersData(true);
+            if (globalData[this.saFolderName]) {
+              this.saCollapsed = !globalData[this.saFolderName].collapsed;
+              globalData[this.saFolderName].collapsed = !globalData[this.saFolderName].collapsed;
+              setFoldersData(true, globalData);
+            }
           }
           targetWorkspace.refreshToolboxSelection_();
         };
 
-        const data = getFoldersData(false);
-        const globalData = getFoldersData(true);
         this.saCollapsed = false;
-        if (data[this.saFolderName] && data[this.saFolderName].collapsed) this.saCollapsed = true;
-        if (globalData[this.saFolderName] && globalData[this.saFolderName].collapsed) this.saCollapsed = true;
+        if (this.saLocalFolder) {
+          const data = getFoldersData(false);
+          if (data[this.saFolderName] && data[this.saFolderName].collapsed) this.saCollapsed = true;
+        }
+        if (this.saGlobalFolder) {
+          const globalData = getFoldersData(true);
+          if (globalData[this.saFolderName] && globalData[this.saFolderName].collapsed) this.saCollapsed = true;
+        }
       }
 
       this.isLabel_ = isLabel;
@@ -319,8 +378,8 @@ export default async function ({ addon, msg, safeMsg, console }) {
 
     onSAMouseDown_(e) {
       if (!ScratchBlocks.utils.isRightButton(e)) return;
-      // The flyout listens for a mousedown gesture, which removes our context menu.
-      // Workaround this by creating it a bit later
+      // the flyout listens for a mousedown gesture, which removes our context menu.
+      // workaround this by creating it a bit later
       setTimeout(() => {
         const menuOptions = [];
 
@@ -330,30 +389,35 @@ export default async function ({ addon, msg, safeMsg, console }) {
           callback: () => {
             // TODO: l10n
             ScratchBlocks.prompt(
-              "Rename this folder to:",
+              "Rename this folder to: (max 50 characters)",
               this.saFolderName,
-              (newName) => {
-                if (!newName) return;
+              (_newName) => {
+                if (!_newName) return;
+                const newName = _newName.substring(0, 50);
 
                 const folderName = this.saFolderName;
-                const data = getFoldersData(false);
-                const globalData = getFoldersData(true);
-                if (data[folderName]) {
-                  data[newName] = data[folderName];
-                  delete data[folderName];
-                  setFoldersData(false, data);
+                if (this.saLocalFolder) {
+                  const data = getFoldersData(false);
+                  if (data[folderName]) {
+                    data[newName] = data[folderName];
+                    delete data[folderName];
+                    setFoldersData(false, data);
+                  }
                 }
-                if (globalData[folderName]) {
-                  globalData[newName] = globalData[folderName];
-                  delete globalData[folderName];
-                  setFoldersData(true, globalData);
+                if (this.saGlobalFolder) {
+                  const globalData = getFoldersData(true);
+                  if (globalData[folderName]) {
+                    globalData[newName] = globalData[folderName];
+                    delete globalData[folderName];
+                    setFoldersData(true, globalData);
+                  }
                 }
                 this.saFolderName = newName;
                 this.workspace_.refreshToolboxSelection_();
-                // The broadcast variable type has no extra buttons, so we use it
-                // TODO: l10n
               },
+              // TODO: l10n
               "Rename Folder",
+              // the broadcast variable type has no extra buttons, so we use it
               "broadcast_msg"
             );
           },
@@ -367,15 +431,19 @@ export default async function ({ addon, msg, safeMsg, console }) {
             // "Deleting" the folder ungroups all variables from the folder;
             // it doesn't delete all variables that are in the folder
             const folderName = this.saFolderName;
-            const data = getFoldersData(false);
-            const globalData = getFoldersData(true);
-            if (data[folderName]) {
-              delete data[folderName];
-              setFoldersData(false, data);
+            if (this.saLocalFolder) {
+              const data = getFoldersData(false);
+              if (data[folderName]) {
+                delete data[folderName];
+                setFoldersData(false, data);
+              }
             }
-            if (globalData[folderName]) {
-              delete globalData[folderName];
-              setFoldersData(true, globalData);
+            if (this.saGlobalFolder) {
+              const globalData = getFoldersData(true);
+              if (globalData[folderName]) {
+                delete globalData[folderName];
+                setFoldersData(true, globalData);
+              }
             }
             this.workspace_.refreshToolboxSelection_();
           },
@@ -419,6 +487,7 @@ export default async function ({ addon, msg, safeMsg, console }) {
     this.CHECKBOX_SIZE = this.ACTUAL_CHECKBOX_SIZE;
     oldCreateCheckbox.call(this, block, cursorX + extraX, cursorY, blockHW);
 
+    // blocks after the first block in a folder get a taller indent
     const extraHeight = !!block.saFirstInFolder ? 0 : blockHW.height / 2 - 4;
 
     if (!inFolder) return;
@@ -440,6 +509,7 @@ export default async function ({ addon, msg, safeMsg, console }) {
       check.svgRoot
     );
 
+    // this is kind of a hack to offset the block to account for the indent
     this.CHECKBOX_SIZE = this.ACTUAL_CHECKBOX_SIZE + extraX;
   };
 

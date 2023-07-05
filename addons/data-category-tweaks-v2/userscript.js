@@ -1,4 +1,4 @@
-import { init, BIG_GAP, SMALL_GAP, callbacks } from "./module.js";
+import { init, BIG_GAP, SMALL_GAP, callbacks, sharedData } from "./module.js";
 
 export default async function ({ addon, console, msg, safeMsg }) {
   // Used in setting change handler. Updated in getBlocksXML.
@@ -24,6 +24,7 @@ export default async function ({ addon, console, msg, safeMsg }) {
     const makeLabel = (l10n) => {
       const label = document.createElement("label");
       label.setAttribute("text", msg(l10n));
+      label.setAttribute("data", l10n);
       return label;
     };
 
@@ -201,14 +202,17 @@ export default async function ({ addon, console, msg, safeMsg }) {
 
   addon.self.addEventListener("disabled", () => {
     dynamicEnableOrDisable();
+    sharedData.separateLocalVariables = false;
   });
   addon.self.addEventListener("reenabled", () => {
     dynamicEnableOrDisable();
+    sharedData.separateLocalVariables = addon.settings.get("separateLocalVariables");
   });
   addon.settings.addEventListener("change", (e) => {
     // When the separate list category option changes, we need to do a workspace update.
     // For all other options, just refresh the toolbox.
     // Always doing both of these in response to a settings change causes many issues.
+    sharedData.separateLocalVariables = addon.settings.get("separateLocalVariables");
     if (addon.settings.get("separateListCategory") !== hasSeparateListCategory) {
       if (vm.editingTarget) {
         vm.emitWorkspaceUpdate();
@@ -220,4 +224,5 @@ export default async function ({ addon, console, msg, safeMsg }) {
       }
     }
   });
+  sharedData.separateLocalVariables = addon.settings.get("separateLocalVariables");
 }

@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/ScratchAddons/manifest-schema/dist/schema.json",
   "name": "Variable folders",
-  "description": "Adds folders to the Variables and Lists categories. To create a folder, right click any variable and click \"Add to folder\". Click a folder to open or close it. Right click a variable in a folder to move it to another folder or remove it from its folder. This feature works by adding a comment to your sprites containing the folder data.",
+  "description": "Adds folders to the Variables category. To create a folder, right click any variable in the block palette and click \"Add to folder\". Click a folder to open or close it. Right click a variable in a folder to move it to another folder or remove it from its folder. This feature works by adding a comment to your sprites containing the folder data.",
   "credits": [
     {
       "name": "CST1229",

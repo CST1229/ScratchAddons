@@ -12,6 +12,9 @@ export const callbacks = {
   lists: null,
   varFolders: null,
 };
+export const sharedData = {
+  separateLocalVariables: false
+};
 
 export async function init(addon) {
   if (initialized) return;
@@ -24,16 +27,18 @@ export async function init(addon) {
   // https://github.com/LLK/scratch-blocks/blob/61f02e4cac0f963abd93013842fe536ef24a0e98/core/flyout_base.js#L469
   const oldShow = ScratchBlocks.Flyout.prototype.show;
   ScratchBlocks.Flyout.prototype.show = function (xmlList) {
+    const varFoldersCallback =
+      callbacks.varFolders ? ((cat) => callbacks.varFolders(cat, this.workspace_)) : (r) => r;
     this.workspace_.registerToolboxCategoryCallback("VARIABLE", (ws) => {
       if (callbacks.variables) {
-        return callbacks.variables(ws, callbacks.varFolders || ((r) => r));
+        return callbacks.variables(ws, varFoldersCallback);
       }
       return DataCategory(ws);
     });
     // only runs when data-category-tweaks-v2 adds a LIST category
     this.workspace_.registerToolboxCategoryCallback("LIST", (ws) => {
       if (callbacks.lists) {
-        return callbacks.lists(ws, callbacks.varFolders || ((r) => r));
+        return callbacks.lists(ws, varFoldersCallback);
       }
     });
     return oldShow.call(this, xmlList);
