@@ -112,6 +112,12 @@ export default async function ({ template }) {
               );
           } else toggle();
         } else toggle();
+        
+        if (this.addon._addonId == "useless") {
+          setTimeout(() => {
+            if (this.addon._enabled) toggle();
+          }, 333);
+        }
       },
       highlightSetting(id) {
         this.highlightedSettingId = id;
