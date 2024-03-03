@@ -40,7 +40,7 @@ export default async function ({ addon, msg, safeMsg, console }) {
       350,
       150,
       // minimized
-      false,
+      false
     );
     return target.comments[id];
   };
@@ -120,12 +120,14 @@ export default async function ({ addon, msg, safeMsg, console }) {
             notInFolder.push(el);
           }
         } else {
-          const foldersObj = sharedData.separateLocalVariables ? (local ? localFolders : folders) : folders;
+          const foldersObj = sharedData.separateLocalVariables ? (
+            local ? localFolders : folders
+          ) : folders;
           if (!(folder in foldersObj)) foldersObj[folder] = { vars: [], collapsed: false };
-          if (consideredLocal && data[folder])
-            foldersObj[folder].collapsed = foldersObj[folder].collapsed || data[folder].collapsed;
-          if (consideredGlobal && globalData[folder])
-            foldersObj[folder].collapsed = foldersObj[folder].collapsed || globalData[folder].collapsed;
+          if (consideredLocal && data[folder]) foldersObj[folder].collapsed =
+            foldersObj[folder].collapsed || data[folder].collapsed;
+          if (consideredGlobal && globalData[folder]) foldersObj[folder].collapsed =
+            foldersObj[folder].collapsed || globalData[folder].collapsed;
           foldersObj[folder].vars.push(el);
         }
       }
@@ -154,7 +156,10 @@ export default async function ({ addon, msg, safeMsg, console }) {
       // create variable button.
       // add the folders and variables after this
       // if local variables aren't separated
-      if (!sharedData.separateLocalVariables && el.hasAttribute("callbackkey")) {
+      if (
+        !sharedData.separateLocalVariables &&
+        el.hasAttribute("callbackkey")
+      ) {
         newCat.push(el);
         pushFolders(folders, true, true);
 
@@ -196,15 +201,13 @@ export default async function ({ addon, msg, safeMsg, console }) {
       if (variable) {
         const data = getFoldersData(!variable.isLocal);
         const alreadyInFolder = Object.values(data).find(
-          (o) => o.variables && Array.isArray(o.variables) && o.variables.includes(variable.getId()),
+          (o) => o.variables && Array.isArray(o.variables) && o.variables.includes(variable.getId())
         );
 
         // TODO: l10n
         const menuText = alreadyInFolder ? "Move to other folder" : "Add to folder";
         const modalCaption = alreadyInFolder ? "Move to Other Folder" : "Add to Folder";
-        const modalMessage = alreadyInFolder
-          ? "Folder to move to: (max 50 characters)"
-          : "Folder to add to: (max 50 characters)";
+        const modalMessage = alreadyInFolder ? "Folder to move to: (max 50 characters)" : "Folder to add to: (max 50 characters)";
 
         items.push({
           enabled: true,
@@ -231,7 +234,7 @@ export default async function ({ addon, msg, safeMsg, console }) {
               },
               modalCaption,
               // the broadcast variable type has no extra buttons, so we use it
-              "broadcast_msg",
+              "broadcast_msg"
             );
           },
         });
@@ -260,7 +263,7 @@ export default async function ({ addon, msg, safeMsg, console }) {
     {
       flyout: true,
       blocks: true,
-    },
+    }
   );
 
   const RIGHT = "▶︎";
@@ -342,7 +345,7 @@ export default async function ({ addon, msg, safeMsg, console }) {
             "text-anchor": "left",
             "dominant-baseline": "central",
           },
-          this.svgGroup_,
+          this.svgGroup_
         );
       }
       text.textContent = this.text_;
@@ -368,7 +371,7 @@ export default async function ({ addon, msg, safeMsg, console }) {
         this.svgGroup_,
         "mousedown",
         this,
-        this.onSAMouseDown_,
+        this.onSAMouseDown_
       );
       return group;
     }
@@ -415,7 +418,7 @@ export default async function ({ addon, msg, safeMsg, console }) {
               // TODO: l10n
               "Rename Folder",
               // the broadcast variable type has no extra buttons, so we use it
-              "broadcast_msg",
+              "broadcast_msg"
             );
           },
         });
@@ -503,7 +506,7 @@ export default async function ({ addon, msg, safeMsg, console }) {
           extraHeight
         )}`,
       },
-      check.svgRoot,
+      check.svgRoot
     );
 
     // this is kind of a hack to offset the block to account for the indent
