@@ -120,14 +120,12 @@ export default async function ({ addon, msg, safeMsg, console }) {
             notInFolder.push(el);
           }
         } else {
-          const foldersObj = sharedData.separateLocalVariables ? (
-            local ? localFolders : folders
-          ) : folders;
+          const foldersObj = sharedData.separateLocalVariables ? (local ? localFolders : folders) : folders;
           if (!(folder in foldersObj)) foldersObj[folder] = { vars: [], collapsed: false };
-          if (consideredLocal && data[folder]) foldersObj[folder].collapsed =
-            foldersObj[folder].collapsed || data[folder].collapsed;
-          if (consideredGlobal && globalData[folder]) foldersObj[folder].collapsed =
-            foldersObj[folder].collapsed || globalData[folder].collapsed;
+          if (consideredLocal && data[folder])
+            foldersObj[folder].collapsed = foldersObj[folder].collapsed || data[folder].collapsed;
+          if (consideredGlobal && globalData[folder])
+            foldersObj[folder].collapsed = foldersObj[folder].collapsed || globalData[folder].collapsed;
           foldersObj[folder].vars.push(el);
         }
       }
@@ -156,10 +154,7 @@ export default async function ({ addon, msg, safeMsg, console }) {
       // create variable button.
       // add the folders and variables after this
       // if local variables aren't separated
-      if (
-        !sharedData.separateLocalVariables &&
-        el.hasAttribute("callbackkey")
-      ) {
+      if (!sharedData.separateLocalVariables && el.hasAttribute("callbackkey")) {
         newCat.push(el);
         pushFolders(folders, true, true);
 
@@ -207,7 +202,9 @@ export default async function ({ addon, msg, safeMsg, console }) {
         // TODO: l10n
         const menuText = alreadyInFolder ? "Move to other folder" : "Add to folder";
         const modalCaption = alreadyInFolder ? "Move to Other Folder" : "Add to Folder";
-        const modalMessage = alreadyInFolder ? "Folder to move to: (max 50 characters)" : "Folder to add to: (max 50 characters)";
+        const modalMessage = alreadyInFolder
+          ? "Folder to move to: (max 50 characters)"
+          : "Folder to add to: (max 50 characters)";
 
         items.push({
           enabled: true,
