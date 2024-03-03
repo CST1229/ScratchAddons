@@ -150,7 +150,8 @@ select {
 .modal h2,
 .modal h3,
 .modal h4,
-.profile-box-footer-module h4 {
+.profile-box-footer-module h4,
+.stats li {
   color: var(--darkWww-box-scratchr2HeaderText);
 }
 .box-content label,
@@ -217,7 +218,8 @@ input::placeholder {
 .box-content .icon-xs.black,
 .box-content .icon-sm.black,
 .button.grey .icon-xs.black,
-.button.grey .icon-sm.black {
+.button.grey .icon-sm.black,
+.sa-footer-arrow {
   filter: var(--darkWww-box-eyeFilter);
 }
 .box,
@@ -410,7 +412,9 @@ textarea:focus,
 .registration .modal-body textarea:focus,
 .registration .modal-body select:focus {
   border-color: var(--darkWww-button);
-  box-shadow: 0 1px 1px inset rgba(0, 0, 0, 0.08), 0 0 8px var(--darkWww-button-scratchr2InputFocusShadow);
+  box-shadow:
+    0 1px 1px inset rgba(0, 0, 0, 0.08),
+    0 0 8px var(--darkWww-button-scratchr2InputFocusShadow);
 }
 .editable textarea:focus,
 .editable-empty textarea:focus {
@@ -487,7 +491,7 @@ input.link.black:active,
 .nvd3 .nv-axis line /* statistics */ {
   stroke: var(--darkWww-border);
 }
-#footer /* for infinite scrolling fixed footer */,
+.sa-collapse-footer #footer,
 .thumb img,
 .djangobb blockquote,
 .my-ocular-popup,
@@ -560,6 +564,12 @@ ul.pagination span /* mobile forums */,
 .post-content blockquote /* mobile forums */,
 .post-content div.code /* mobile forums */ {
   border-color: var(--darkWww-border-33) !important;
+}
+
+/* Message count */
+#topnav ul.account-nav .messages .notificationsCount {
+  background-color: var(--darkWww-messageIndicatorColor-scratchr2);
+  color: var(--darkWww-messageIndicatorColor-scratchr2Text) !important;
 }
 
 /* Miscellaneous styles */
@@ -695,4 +705,12 @@ input.link.black {
    is meant to be entirely transparent. */
 .iframeshim {
   color-scheme: light;
+}
+
+/* Forum errors */
+
+.djangobb ul.errorlist {
+  background-color: var(--darkWww-box);
+  border-color: var(--darkWww-page-forumErrorColor);
+  color: var(--darkWww-page-forumErrorColor);
 }
