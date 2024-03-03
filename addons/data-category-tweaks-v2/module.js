@@ -24,7 +24,7 @@ export async function init(addon) {
   const DataCategory = ScratchBlocks.DataCategory;
 
   // Each time a new workspace is made, these callbacks are reset, so re-register whenever a flyout is shown.
-  // https://github.com/LLK/scratch-blocks/blob/61f02e4cac0f963abd93013842fe536ef24a0e98/core/flyout_base.js#L469
+  // https://github.com/scratchfoundation/scratch-blocks/blob/61f02e4cac0f963abd93013842fe536ef24a0e98/core/flyout_base.js#L469
   const oldShow = ScratchBlocks.Flyout.prototype.show;
   ScratchBlocks.Flyout.prototype.show = function (xmlList) {
     const varFoldersCallback =
