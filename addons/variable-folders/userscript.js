@@ -124,9 +124,14 @@ export default async function ({ addon, console }) {
           const foldersObj = sharedData.separateLocalVariables ? (local ? localFolders : folders) : folders;
           if (!(objFolder in foldersObj)) {
             foldersObj[objFolder] = { vars: [], collapsed: false, name: folder };
-            if (consideredLocal) foldersObj[objFolder].collapsed ||= getFolderCollapsed(vm.editingTarget, variable.type, folder);
+            if (consideredLocal)
+              foldersObj[objFolder].collapsed ||= getFolderCollapsed(vm.editingTarget, variable.type, folder);
             if (consideredGlobal)
-              foldersObj[objFolder].collapsed ||= getFolderCollapsed(vm.runtime.getTargetForStage(), variable.type, folder);
+              foldersObj[objFolder].collapsed ||= getFolderCollapsed(
+                vm.runtime.getTargetForStage(),
+                variable.type,
+                folder
+              );
           }
           foldersObj[objFolder].vars.push(el);
         }
@@ -204,7 +209,9 @@ export default async function ({ addon, console }) {
   }
   function applyFolderComboBox() {
     debugger;
-    const input = document.querySelector("[class*='prompt_body'] > div > input[class*='prompt_variable-name-text-input']");
+    const input = document.querySelector(
+      "[class*='prompt_body'] > div > input[class*='prompt_variable-name-text-input']"
+    );
     if (!input) return;
     const datalist = document.createElement("datalist");
     datalist.id = "sa-folders";
@@ -306,7 +313,12 @@ export default async function ({ addon, console }) {
           }
           if (this.saGlobalFolder) {
             const stage = vm.runtime.getTargetForStage();
-            setFolderCollapsed(stage, this.saFolderType, this.saFolderName, !getFolderCollapsed(stage, this.saFolderType, this.saFolderName));
+            setFolderCollapsed(
+              stage,
+              this.saFolderType,
+              this.saFolderName,
+              !getFolderCollapsed(stage, this.saFolderType, this.saFolderName)
+            );
           }
           targetWorkspace.refreshToolboxSelection_();
         };
