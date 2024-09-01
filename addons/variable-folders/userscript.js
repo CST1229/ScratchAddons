@@ -54,11 +54,18 @@ export default async function ({ addon, console }) {
     } else {
       // We don't want to rename the variable if one with the exact new name
       // already exists.
-      console.warn('Unexpected conflict when attempting to rename ' +
-        'variable with name: ' + variable.name + ' and id: ' + variable.getId() +
-        ' to new name: ' + newName + '. A variable with the new name already exists' +
-        ' and has id: ' + conflictVar.getId());
-
+      console.warn(
+        "Unexpected conflict when attempting to rename " +
+          "variable with name: " +
+          variable.name +
+          " and id: " +
+          variable.getId() +
+          " to new name: " +
+          newName +
+          ". A variable with the new name already exists" +
+          " and has id: " +
+          conflictVar.getId()
+      );
     }
   };
 
@@ -478,12 +485,12 @@ export default async function ({ addon, console }) {
     }
     if (hideInWorkspace !== _hideInWorkspace) {
       hideInWorkspace = _hideInWorkspace;
-      updateAllBlocks(addon.tab, {updateMainWorkspace: true, updateFlyout: false, updateCategories: false});
+      updateAllBlocks(addon.tab, { updateMainWorkspace: true, updateFlyout: false, updateCategories: false });
     }
   });
 
   const oldGetText = ScratchBlocks.FieldVariableGetter.prototype.getText;
-  ScratchBlocks.FieldVariableGetter.prototype.getText = function() {
+  ScratchBlocks.FieldVariableGetter.prototype.getText = function () {
     const text = oldGetText.call(this);
     if (!text || addon.self.disabled) return text;
     const isInFlyout = this.sourceBlock_?.isInFlyout;
@@ -493,7 +500,7 @@ export default async function ({ addon, console }) {
     return text;
   };
   const oldGetDisplayText = ScratchBlocks.FieldVariableGetter.prototype.getDisplayText_;
-  ScratchBlocks.FieldVariableGetter.prototype.getDisplayText_ = function() {
+  ScratchBlocks.FieldVariableGetter.prototype.getDisplayText_ = function () {
     const oldText = this.text_;
     this.text_ = this.getText();
     const returnValue = oldGetDisplayText.call(this);
@@ -504,7 +511,8 @@ export default async function ({ addon, console }) {
   addon.tab.traps.getWorkspace().refreshToolboxSelection_();
   const onDisableEnable = () => {
     addon.tab.traps.getWorkspace().refreshToolboxSelection_();
-    if (hideInWorkspace) updateAllBlocks(addon.tab, {updateMainWorkspace: true, updateFlyout: false, updateCategories: false});
+    if (hideInWorkspace)
+      updateAllBlocks(addon.tab, { updateMainWorkspace: true, updateFlyout: false, updateCategories: false });
   };
   addon.self.addEventListener("disabled", onDisableEnable);
   addon.self.addEventListener("reenabled", onDisableEnable);
