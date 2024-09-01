@@ -7,6 +7,8 @@ export default async function ({ addon, console }) {
 
   const FOLDER_REGEX = /^\[([^\]]+)\] (.+)$/;
 
+  let collapseByDefault = addon.settings.get("collapseByDefault");
+
   const folderToVarName = (name, folderName) => {
     const match = name.match(FOLDER_REGEX);
     if (!match) {
@@ -69,13 +71,14 @@ export default async function ({ addon, console }) {
     }
   };
 
-  const getFolderCollapsed = (target, name) => {
+  const getFolderCollapsed = (target, type, name) => {
     if (!target._foldersCollapsed) target._foldersCollapsed = Object.create(null);
-    return !!target._foldersCollapsed[name];
+    // Lists are in a separate category, so add type to differentiate collapsed list and variable folders
+    return !!(target._foldersCollapsed[type + "_" + name] ?? collapseByDefault);
   };
-  const setFolderCollapsed = (target, name, collapsed) => {
+  const setFolderCollapsed = (target, type, name, collapsed) => {
     if (!target._foldersCollapsed) target._foldersCollapsed = Object.create(null);
-    target._foldersCollapsed[name] = collapsed;
+    target._foldersCollapsed[type + "_" + name] = collapsed;
   };
 
   // process the data category and add folders into it
@@ -84,13 +87,13 @@ export default async function ({ addon, console }) {
       return vars;
     }
 
-    const makeButtonFor = (text, isLocal, isGlobal, listFolder) => {
+    const makeButtonFor = (text, isLocal, isGlobal, folderType) => {
       const label = document.createElement("button");
       label.setAttribute("text", text);
       label.setAttribute("sa-folder-name", text);
       label.setAttribute("sa-local-folder", isLocal);
       label.setAttribute("sa-global-folder", isGlobal);
-      label.setAttribute("sa-list-folder", listFolder);
+      label.setAttribute("sa-folder-type", folderType);
       return label;
     };
 
@@ -117,24 +120,25 @@ export default async function ({ addon, console }) {
             notInFolder.push(el);
           }
         } else {
+          const objFolder = variable.type + "_" + folder;
           const foldersObj = sharedData.separateLocalVariables ? (local ? localFolders : folders) : folders;
-          if (!(folder in foldersObj)) {
-            foldersObj[folder] = { vars: [], collapsed: false };
-            if (consideredLocal) foldersObj[folder].collapsed ||= getFolderCollapsed(vm.editingTarget, folder);
+          if (!(objFolder in foldersObj)) {
+            foldersObj[objFolder] = { vars: [], collapsed: false, name: folder };
+            if (consideredLocal) foldersObj[objFolder].collapsed ||= getFolderCollapsed(vm.editingTarget, variable.type, folder);
             if (consideredGlobal)
-              foldersObj[folder].collapsed ||= getFolderCollapsed(vm.runtime.getTargetForStage(), folder);
+              foldersObj[objFolder].collapsed ||= getFolderCollapsed(vm.runtime.getTargetForStage(), variable.type, folder);
           }
-          foldersObj[folder].vars.push(el);
+          foldersObj[objFolder].vars.push(el);
         }
       }
     }
 
-    let atLists = false;
+    let varType = "";
 
     let newCat = [];
     const pushFolders = (foldersObj, isLocal, isGlobal) => {
       for (const folder in foldersObj) {
-        newCat.push(makeButtonFor(folder, isLocal, isGlobal, atLists));
+        newCat.push(makeButtonFor(foldersObj[folder].name, isLocal, isGlobal, varType));
         if (!foldersObj[folder].collapsed) {
           for (const v of foldersObj[folder].vars) {
             newCat.push(v);
@@ -148,7 +152,7 @@ export default async function ({ addon, console }) {
     for (const el of vars) {
       // list reporter. we're now in the list category
       if (el.getAttribute("type") === "data_listcontents") {
-        atLists = true;
+        varType = "list";
       }
       // variable reporter. we add those ourselves
       if (el.hasAttribute("id")) {
@@ -186,6 +190,33 @@ export default async function ({ addon, console }) {
     return newCat;
   };
 
+  function getAllFolders() {
+    const ws = addon.tab.traps.getWorkspace();
+    const folders = new Set();
+    if (!ws) return folders;
+    for (const variable of ws.getAllVariables()) {
+      // Broadcasts are considered variables, but they can't be put into folders by this addon
+      if (variable.type !== "" && variable.type !== "list") continue;
+      const folderName = folderToVarName(variable.name);
+      if (folderName) folders.add(folderName);
+    }
+    return folders;
+  }
+  function applyFolderComboBox() {
+    debugger;
+    const input = document.querySelector("[class*='prompt_body'] > div > input[class*='prompt_variable-name-text-input']");
+    if (!input) return;
+    const datalist = document.createElement("datalist");
+    datalist.id = "sa-folders";
+    for (const folder of getAllFolders()) {
+      const item = document.createElement("option");
+      item.value = folder;
+      datalist.appendChild(item);
+    }
+    input.parentElement.appendChild(datalist);
+    input.setAttribute("list", datalist.id);
+  }
+
   callbacks.varFolders = turnIntoFolders;
   await init(addon);
 
@@ -222,6 +253,7 @@ export default async function ({ addon, console }) {
               // the broadcast variable type has no extra buttons, so we use it
               "broadcast_msg"
             );
+            applyFolderComboBox();
           },
         });
         // TODO: l10n
@@ -256,7 +288,7 @@ export default async function ({ addon, console }) {
         this.saFolderButton = true;
         this.saFolderName = xml.getAttribute("sa-folder-name") || "";
 
-        this.saListFolder = xml.getAttribute("sa-list-folder") === "true";
+        this.saFolderType = xml.getAttribute("sa-folder-type");
         // these variables are used for seeing which folders to modify,
         // if there are folders with the same name in the stage and sprite
         // (if separate local variables is enabled, local and global folders
@@ -267,23 +299,24 @@ export default async function ({ addon, console }) {
           if (this.saLocalFolder) {
             setFolderCollapsed(
               vm.editingTarget,
+              this.saFolderType,
               this.saFolderName,
-              !getFolderCollapsed(vm.editingTarget, this.saFolderName)
+              !getFolderCollapsed(vm.editingTarget, this.saFolderType, this.saFolderName)
             );
           }
           if (this.saGlobalFolder) {
             const stage = vm.runtime.getTargetForStage();
-            setFolderCollapsed(stage, this.saFolderName, !getFolderCollapsed(stage, this.saFolderName));
+            setFolderCollapsed(stage, this.saFolderType, this.saFolderName, !getFolderCollapsed(stage, this.saFolderType, this.saFolderName));
           }
           targetWorkspace.refreshToolboxSelection_();
         };
 
         this.saCollapsed = false;
         if (this.saLocalFolder) {
-          this.saCollapsed ||= getFolderCollapsed(vm.editingTarget, this.saFolderName);
+          this.saCollapsed ||= getFolderCollapsed(vm.editingTarget, this.saFolderType, this.saFolderName);
         }
         if (this.saGlobalFolder) {
-          this.saCollapsed ||= getFolderCollapsed(vm.runtime.getTargetForStage(), this.saFolderName);
+          this.saCollapsed ||= getFolderCollapsed(vm.runtime.getTargetForStage(), this.saFolderType, this.saFolderName);
         }
       }
 
@@ -370,7 +403,7 @@ export default async function ({ addon, console }) {
                 const ws = this.workspace_;
                 // TODO: rename folders in other sprites?
                 // TODO: handle variable name conflicts?
-                const vars = ws.variableMap_.getVariablesOfType(this.saListFolder ? "list" : "");
+                const vars = ws.variableMap_.getVariablesOfType(this.saFolderType);
                 ScratchBlocks.Events.setGroup(true);
                 for (const variable of vars) {
                   // with separated sprite-only variables, only rename variables of the same scope
@@ -399,7 +432,7 @@ export default async function ({ addon, console }) {
           callback: () => {
             // TODO: delete folders in other sprites?
             const ws = this.workspace_;
-            const vars = ws.variableMap_.getVariablesOfType(this.saListFolder ? "list" : "");
+            const vars = ws.variableMap_.getVariablesOfType(this.saFolderButton);
             ScratchBlocks.Events.setGroup(true);
             for (const variable of vars) {
               // with separated sprite-only variables, only rename variables of the same scope
@@ -476,19 +509,28 @@ export default async function ({ addon, console }) {
     this.CHECKBOX_SIZE = this.ACTUAL_CHECKBOX_SIZE + extraX;
   };
 
-  let hideInPalette = addon.settings.get("hideFolderInPalette");
-  let hideInWorkspace = addon.settings.get("hideFolderInWorkspace");
+  let hideFolderInPalette = addon.settings.get("hideFolderInPalette");
+  let hideFolderInWorkspace = addon.settings.get("hideFolderInWorkspace");
   addon.settings.addEventListener("change", () => {
-    const _hideInPalette = addon.settings.get("hideFolderInPalette");
-    const _hideInWorkspace = addon.settings.get("hideFolderInWorkspace");
-    if (hideInPalette !== _hideInPalette) {
-      hideInPalette = _hideInPalette;
-      addon.tab.traps.getWorkspace().refreshToolboxSelection_();
+    let refreshToolbox = false;
+
+    const _hideFolderInPalette = addon.settings.get("hideFolderInPalette");
+    const _hideFolderInWorkspace = addon.settings.get("hideFolderInWorkspace");
+    const _collapseByDefault = addon.settings.get("collapseByDefault");
+    if (collapseByDefault !== _collapseByDefault) {
+      collapseByDefault = _collapseByDefault;
+      refreshToolbox = true;
     }
-    if (hideInWorkspace !== _hideInWorkspace) {
-      hideInWorkspace = _hideInWorkspace;
+    if (hideFolderInPalette !== _hideFolderInPalette) {
+      hideFolderInPalette = _hideFolderInPalette;
+      refreshToolbox = true;
+    }
+    if (hideFolderInWorkspace !== _hideFolderInWorkspace) {
+      hideFolderInWorkspace = _hideFolderInWorkspace;
       updateAllBlocks(addon.tab, { updateMainWorkspace: true, updateFlyout: false, updateCategories: false });
     }
+
+    if (refreshToolbox) addon.tab.traps.getWorkspace().refreshToolboxSelection_();
   });
 
   const oldGetText = ScratchBlocks.FieldVariableGetter.prototype.getText;
@@ -496,7 +538,7 @@ export default async function ({ addon, console }) {
     const text = oldGetText.call(this);
     if (!text || addon.self.disabled) return text;
     const isInFlyout = this.sourceBlock_?.isInFlyout;
-    if ((hideInPalette && isInFlyout) || (hideInWorkspace && !isInFlyout)) {
+    if ((hideFolderInPalette && isInFlyout) || (hideFolderInWorkspace && !isInFlyout)) {
       return nameFromVarName(text);
     }
     return text;
@@ -513,7 +555,7 @@ export default async function ({ addon, console }) {
   addon.tab.traps.getWorkspace().refreshToolboxSelection_();
   const onDisableEnable = () => {
     addon.tab.traps.getWorkspace().refreshToolboxSelection_();
-    if (hideInWorkspace)
+    if (hideFolderInWorkspace)
       updateAllBlocks(addon.tab, { updateMainWorkspace: true, updateFlyout: false, updateCategories: false });
   };
   addon.self.addEventListener("disabled", onDisableEnable);

@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/ScratchAddons/manifest-schema/dist/schema.json",
   "name": "Variable folders",
-  "description": "Adds folders to the Variables category. To create a folder, right click any variable in the block palette and click \"Add to folder\". Click a folder to open or close it. Right click a variable in a folder to move it to another folder or remove it from its folder. This feature works by adding a comment to your sprites containing the folder data.",
+  "description": "Adds folders to the Variables category. To create a folder, right click any variable in the block palette and click \"Add to folder\". Right click a variable in a folder to move it to another folder or remove it from its folder. Right click a folder to rename or delete it (removing all variables from the folder, but not the variables themselves). This feature works by adding \"[folderName] \" at the beginning of the names for your variables.",
   "credits": [
     {
       "name": "CST1229",
@@ -13,11 +13,6 @@
       "type": "notice",
       "text": "Users with this addon enabled will be able to see the folders in your project. Anyone else will see variable lists normally (no folders).",
       "id": "nonSAUsers"
-    },
-    {
-      "type": "notice",
-      "text": "Some project.json compression utilities might remove the variable folders.",
-      "id": "jsonCompression"
     }
   ],
   "tags": ["editor", "codeEditor"],
@@ -34,6 +29,12 @@
     }
   ],
   "settings": [
+    {
+      "name": "Collapse folders by default",
+      "id": "collapseByDefault",
+      "type": "boolean",
+      "default": false
+    },
     {
       "name": "Hide folder name from variable blocks in block palette",
       "id": "hideFolderInPalette",
