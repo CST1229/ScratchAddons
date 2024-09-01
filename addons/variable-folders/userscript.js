@@ -113,8 +113,7 @@ export default async function ({ addon, console }) {
           const foldersObj = sharedData.separateLocalVariables ? (local ? localFolders : folders) : folders;
           if (!(folder in foldersObj)) {
             foldersObj[folder] = { vars: [], collapsed: false };
-            if (consideredLocal)
-              foldersObj[folder].collapsed ||= getFolderCollapsed(vm.editingTarget, folder);
+            if (consideredLocal) foldersObj[folder].collapsed ||= getFolderCollapsed(vm.editingTarget, folder);
             if (consideredGlobal)
               foldersObj[folder].collapsed ||= getFolderCollapsed(vm.runtime.getTargetForStage(), folder);
           }
@@ -197,9 +196,7 @@ export default async function ({ addon, console }) {
         // TODO: l10n
         const menuText = alreadyInFolder ? "Move to other folder" : "Add to folder";
         const modalCaption = alreadyInFolder ? "Move to Other Folder" : "Add to Folder";
-        const modalMessage = alreadyInFolder
-          ? "Folder to move to:"
-          : "Folder to add to:";
+        const modalMessage = alreadyInFolder ? "Folder to move to:" : "Folder to add to:";
 
         items.push({
           enabled: true,
@@ -261,7 +258,11 @@ export default async function ({ addon, console }) {
         this.saGlobalFolder = xml.getAttribute("sa-global-folder") === "true";
         this.callback_ = () => {
           if (this.saLocalFolder) {
-            setFolderCollapsed(vm.editingTarget, this.saFolderName, !getFolderCollapsed(vm.editingTarget, this.saFolderName));
+            setFolderCollapsed(
+              vm.editingTarget,
+              this.saFolderName,
+              !getFolderCollapsed(vm.editingTarget, this.saFolderName)
+            );
           }
           if (this.saGlobalFolder) {
             const stage = vm.runtime.getTargetForStage();
