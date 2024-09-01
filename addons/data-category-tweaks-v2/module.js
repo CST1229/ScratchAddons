@@ -32,7 +32,7 @@ export async function init(addon) {
       if (callbacks.variables) {
         return callbacks.variables(ws, varFoldersCallback);
       }
-      return DataCategory(ws);
+      return varFoldersCallback(DataCategory(ws));
     });
     // only runs when data-category-tweaks-v2 adds a LIST category
     this.workspace_.registerToolboxCategoryCallback("LIST", (ws) => {

@@ -6,78 +6,47 @@ export default async function ({ addon, msg, safeMsg, console }) {
 
   const LAST_LINE_REGEX = /(?:\n|^).*\n*$/;
 
-  const COMMENT_MARKER = " // _variable_folders_";
-  // TODO: l10n
-  const COMMENT_HEADER = `This comment contains configuration for variable folders in third-party editors\nYou can move, resize and collapse this comment, but do not edit it by hand`;
+  const FOLDER_REGEX = /^\[([^\]]+)\] (.+)$/;
 
-  // gets the comment where folder data is stored
-  const getFoldersComment = (forStage) => {
-    const target = forStage ? vm.runtime.getTargetForStage() : vm.editingTarget;
-    if (!target) return null;
-    return Object.values(target.comments).find((c) => c.text.endsWith(COMMENT_MARKER));
+  const folderToVarName = (name, folderName) => {
+    const match = name.match(FOLDER_REGEX);
+    if (!match) {
+      if (!folderName) return name;
+      return `[${folderName}] ${name}`;
+    }
+    if (!folderName) return match[1];
+    return `[${folderName}] ${match[1]}`;
   };
-  // creates a folder data comment if it doesn't already exist
-  // and returns it
-  const createFoldersComment = (forStage) => {
-    const target = forStage ? vm.runtime.getTargetForStage() : vm.editingTarget;
-    if (!target) return null;
-    const existingComment = getFoldersComment(forStage);
-    if (existingComment) return existingComment;
-
-    const id = Math.random() + "";
-    const text = `${COMMENT_HEADER}\n{}${COMMENT_MARKER}`;
-
-    target.createComment(
-      // comment ID, just has to be a random string
-      id,
-      // block ID
-      null,
-      // text
-      text,
-      // x, y, width, height
-      50,
-      -150,
-      350,
-      150,
-      // minimized
-      false
-    );
-    return target.comments[id];
+  const folderFromVarName = (name) => {
+    const match = name.match(FOLDER_REGEX);
+    if (!match) return "";
+    return match[1];
+  };
+  const nameFromVarName = (name) => {
+    const match = name.match(FOLDER_REGEX);
+    if (!match) return name;
+    return match[2];
   };
 
-  const getFoldersData = (forStage) => {
-    const comment = getFoldersComment(forStage);
-    if (!comment) return {};
-    const lastLine = comment.text.match(LAST_LINE_REGEX);
-    if (!lastLine) return {};
-    const json = lastLine[0].trim().substring(0, lastLine[0].length - COMMENT_MARKER.length);
-    try {
-      return JSON.parse(json);
-    } catch (e) {
-      return {};
+  const renameVariable = (varId, newName, target = null) => {
+    const ws = addon.tab.traps.getWorkspace();
+    const blocklyVar = ws?.getVariableById(varId);
+    if (blocklyVar) {
+      // if the variable is present in the editing target or is global, rename it through Blockly
+      ws.renameVariableById(varId, newName);
+    } else if (target && Object.hasOwnProperty(target.variables, varId)) {
+      // rename it through the VM, if the variable and target exists
+      target.renameVariable(varId, newName);
     }
   };
 
-  const setFoldersData = (forStage, data) => {
-    const comment = createFoldersComment(forStage);
-    if (!comment) return;
-    comment.text = comment.text.replace(LAST_LINE_REGEX, `\n${JSON.stringify(data)}${COMMENT_MARKER}`);
+  const getFolderCollapsed = (target, name) => {
+    if (!target._foldersCollapsed) target._foldersCollapsed = Object.create(null);
+    return !!target._foldersCollapsed[name];
   };
-
-  const getFolderForVar = (id, workspace) => {
-    const v = workspace.getVariableById(id);
-    if (!v) return null;
-    const local = v.isLocal;
-    const foldersData = getFoldersData(!local);
-
-    for (const name in foldersData) {
-      const vars = foldersData[name].variables;
-      if (!vars || !Array.isArray(vars)) continue;
-      for (const varId of vars) {
-        if (varId === id) return name;
-      }
-    }
-    return null;
+  const setFolderCollapsed = (target, name, collapsed) => {
+    if (!target._foldersCollapsed) target._foldersCollapsed = Object.create(null);
+    target._foldersCollapsed[name] = collapsed;
   };
 
   // process the data category and add folders into it
@@ -86,12 +55,13 @@ export default async function ({ addon, msg, safeMsg, console }) {
       return vars;
     }
 
-    const makeButtonFor = (text, isLocal, isGlobal) => {
+    const makeButtonFor = (text, isLocal, isGlobal, listFolder) => {
       const label = document.createElement("button");
       label.setAttribute("text", text);
       label.setAttribute("sa-folder-name", text);
       label.setAttribute("sa-local-folder", isLocal);
       label.setAttribute("sa-global-folder", isGlobal);
+      label.setAttribute("sa-list-folder", listFolder);
       return label;
     };
 
@@ -100,20 +70,18 @@ export default async function ({ addon, msg, safeMsg, console }) {
     const localNotInFolder = [];
     const notInFolder = [];
 
-    const data = getFoldersData(false);
-    const globalData = getFoldersData(true);
-
     for (const el of vars) {
       // is a variable reporter
       if (el.hasAttribute("id")) {
         const id = el.getAttribute("id");
-        const folder = getFolderForVar(id, ws);
+        const variable = ws.getVariableById(id);
+        const folder = folderFromVarName(variable.name);
 
-        const local = ws.getVariableById(id).isLocal;
+        const local = variable.isLocal;
         const consideredLocal = !sharedData.separateLocalVariables || local;
         const consideredGlobal = !sharedData.separateLocalVariables || !local;
 
-        if (folder === null) {
+        if (!folder) {
           if (local && sharedData.separateLocalVariables) {
             localNotInFolder.push(el);
           } else {
@@ -121,20 +89,24 @@ export default async function ({ addon, msg, safeMsg, console }) {
           }
         } else {
           const foldersObj = sharedData.separateLocalVariables ? (local ? localFolders : folders) : folders;
-          if (!(folder in foldersObj)) foldersObj[folder] = { vars: [], collapsed: false };
-          if (consideredLocal && data[folder])
-            foldersObj[folder].collapsed = foldersObj[folder].collapsed || data[folder].collapsed;
-          if (consideredGlobal && globalData[folder])
-            foldersObj[folder].collapsed = foldersObj[folder].collapsed || globalData[folder].collapsed;
+          if (!(folder in foldersObj)) {
+            foldersObj[folder] = { vars: [], collapsed: false };
+            if (consideredLocal)
+              foldersObj[folder].collapsed ||= getFolderCollapsed(vm.editingTarget, folder);
+            if (consideredGlobal)
+              foldersObj[folder].collapsed ||= getFolderCollapsed(vm.runtime.getTargetForStage(), folder);
+          }
           foldersObj[folder].vars.push(el);
         }
       }
     }
 
+    let atLists = false;
+
     let newCat = [];
     const pushFolders = (foldersObj, isLocal, isGlobal) => {
       for (const folder in foldersObj) {
-        newCat.push(makeButtonFor(folder, isLocal, isGlobal));
+        newCat.push(makeButtonFor(folder, isLocal, isGlobal, atLists));
         if (!foldersObj[folder].collapsed) {
           for (const v of foldersObj[folder].vars) {
             newCat.push(v);
@@ -145,17 +117,22 @@ export default async function ({ addon, msg, safeMsg, console }) {
         }
       }
     };
-    for (const el of Object.values(vars)) {
+    for (const el of vars) {
+      // list reporter. we're now in the list category
+      if (el.getAttribute("type") === "data_listcontents") {
+        atLists = true;
+      }
       // variable reporter. we add those ourselves
       if (el.hasAttribute("id")) {
         continue;
       }
 
+      newCat.push(el);
+
       // create variable button.
       // add the folders and variables after this
       // if local variables aren't separated
       if (!sharedData.separateLocalVariables && el.hasAttribute("callbackkey")) {
-        newCat.push(el);
         pushFolders(folders, true, true);
 
         newCat = newCat.concat(notInFolder);
@@ -167,7 +144,6 @@ export default async function ({ addon, msg, safeMsg, console }) {
       // separation label added by data category tweaks.
       // add this label, then the scope's variables
       if (el.tagName === "LABEL" && el.hasAttribute("data")) {
-        newCat.push(el);
         const local = el.getAttribute("data") === "for-this-sprite-only";
         if (local) {
           pushFolders(localFolders, true, false);
@@ -178,8 +154,6 @@ export default async function ({ addon, msg, safeMsg, console }) {
         }
         continue;
       }
-
-      newCat.push(el);
     }
     return newCat;
   };
@@ -194,17 +168,15 @@ export default async function ({ addon, msg, safeMsg, console }) {
 
       const variable = block.workspace.getVariableById(block.getVars()[0]);
       if (variable) {
-        const data = getFoldersData(!variable.isLocal);
-        const alreadyInFolder = Object.values(data).find(
-          (o) => o.variables && Array.isArray(o.variables) && o.variables.includes(variable.getId())
-        );
+        const alreadyInFolder = !!folderFromVarName(variable.name);
+        const varName = nameFromVarName(variable.name);
 
         // TODO: l10n
         const menuText = alreadyInFolder ? "Move to other folder" : "Add to folder";
         const modalCaption = alreadyInFolder ? "Move to Other Folder" : "Add to Folder";
         const modalMessage = alreadyInFolder
-          ? "Folder to move to: (max 50 characters)"
-          : "Folder to add to: (max 50 characters)";
+          ? "Folder to move to:"
+          : "Folder to add to:";
 
         items.push({
           enabled: true,
@@ -216,18 +188,7 @@ export default async function ({ addon, msg, safeMsg, console }) {
               "",
               (_folder) => {
                 if (!_folder) return;
-                const folder = _folder.substring(0, 50);
-                const data = getFoldersData(!variable.isLocal);
-                for (const folder of Object.values(data)) {
-                  if (!folder) continue;
-                  if (folder.variables && Array.isArray(folder.variables)) {
-                    folder.variables = folder.variables.filter((id) => id !== variable.getId());
-                  }
-                }
-                if (!data[folder]) data[folder] = { variables: [], collapsed: true };
-                data[folder].variables.push(variable.getId());
-                setFoldersData(!variable.isLocal, data);
-                block.workspace.refreshToolboxSelection_();
+                renameVariable(variable.getId(), folderToVarName(varName, _folder));
               },
               modalCaption,
               // the broadcast variable type has no extra buttons, so we use it
@@ -242,15 +203,7 @@ export default async function ({ addon, msg, safeMsg, console }) {
             separator: false,
             text: "Remove from folder",
             callback: () => {
-              const data = getFoldersData(!variable.isLocal);
-              for (const folder of Object.values(data)) {
-                if (!folder) continue;
-                if (folder.variables && Array.isArray(folder.variables)) {
-                  folder.variables = folder.variables.filter((id) => id !== variable.getId());
-                }
-              }
-              setFoldersData(!variable.isLocal, data);
-              block.workspace.refreshToolboxSelection_();
+              renameVariable(variable.getId(), folderToVarName(varName, ""));
             },
           });
         }
@@ -274,6 +227,7 @@ export default async function ({ addon, msg, safeMsg, console }) {
         this.saFolderButton = true;
         this.saFolderName = xml.getAttribute("sa-folder-name") || "";
 
+        this.saListFolder = xml.getAttribute("sa-list-folder") === "true";
         // these variables are used for seeing which folders to modify,
         // if there are folders with the same name in the stage and sprite
         // (if separate local variables is enabled, local and global folders
@@ -282,32 +236,21 @@ export default async function ({ addon, msg, safeMsg, console }) {
         this.saGlobalFolder = xml.getAttribute("sa-global-folder") === "true";
         this.callback_ = () => {
           if (this.saLocalFolder) {
-            const data = getFoldersData(false);
-            if (data[this.saFolderName]) {
-              this.saCollapsed = !data[this.saFolderName].collapsed;
-              data[this.saFolderName].collapsed = !data[this.saFolderName].collapsed;
-              setFoldersData(false, data);
-            }
+            setFolderCollapsed(vm.editingTarget, this.saFolderName, !getFolderCollapsed(vm.editingTarget, this.saFolderName));
           }
           if (this.saGlobalFolder) {
-            const globalData = getFoldersData(true);
-            if (globalData[this.saFolderName]) {
-              this.saCollapsed = !globalData[this.saFolderName].collapsed;
-              globalData[this.saFolderName].collapsed = !globalData[this.saFolderName].collapsed;
-              setFoldersData(true, globalData);
-            }
+            const stage = vm.runtime.getTargetForStage();
+            setFolderCollapsed(stage, this.saFolderName, !getFolderCollapsed(stage, this.saFolderName));
           }
           targetWorkspace.refreshToolboxSelection_();
         };
 
         this.saCollapsed = false;
         if (this.saLocalFolder) {
-          const data = getFoldersData(false);
-          if (data[this.saFolderName] && data[this.saFolderName].collapsed) this.saCollapsed = true;
+          this.saCollapsed ||= getFolderCollapsed(vm.editingTarget, this.saFolderName);
         }
         if (this.saGlobalFolder) {
-          const globalData = getFoldersData(true);
-          if (globalData[this.saFolderName] && globalData[this.saFolderName].collapsed) this.saCollapsed = true;
+          this.saCollapsed ||= getFolderCollapsed(vm.runtime.getTargetForStage(), this.saFolderName);
         }
       }
 
@@ -386,31 +329,24 @@ export default async function ({ addon, msg, safeMsg, console }) {
           callback: () => {
             // TODO: l10n
             ScratchBlocks.prompt(
-              "Rename this folder to: (max 50 characters)",
+              "Rename this folder to:",
               this.saFolderName,
-              (_newName) => {
-                if (!_newName) return;
-                const newName = _newName.substring(0, 50);
+              (newName) => {
+                const oldName = this.saFolderName;
+                if (!newName || oldName === newName) return;
 
-                const folderName = this.saFolderName;
-                if (this.saLocalFolder) {
-                  const data = getFoldersData(false);
-                  if (data[folderName]) {
-                    data[newName] = data[folderName];
-                    delete data[folderName];
-                    setFoldersData(false, data);
+                // TODO: rename folders in other sprites?
+                // TODO: handle variable name conflicts?
+                const vars = this.workspace_.variableMap_.getVariablesOfType(this.saListFolder ? "list" : "");
+                ScratchBlocks.Events.disable();
+                for (const variable of vars) {
+                  const folderName = folderFromVarName(variable.name);
+                  if (folderName === oldName) {
+                    const varName = nameFromVarName(variable.name);
+                    renameVariable(variable.getId(), folderToVarName(varName, newName));
                   }
                 }
-                if (this.saGlobalFolder) {
-                  const globalData = getFoldersData(true);
-                  if (globalData[folderName]) {
-                    globalData[newName] = globalData[folderName];
-                    delete globalData[folderName];
-                    setFoldersData(true, globalData);
-                  }
-                }
-                this.saFolderName = newName;
-                this.workspace_.refreshToolboxSelection_();
+                ScratchBlocks.Events.enable();
               },
               // TODO: l10n
               "Rename Folder",
@@ -425,24 +361,17 @@ export default async function ({ addon, msg, safeMsg, console }) {
           text: "Delete folder",
           enabled: true,
           callback: () => {
-            // "Deleting" the folder ungroups all variables from the folder;
-            // it doesn't delete all variables that are in the folder
-            const folderName = this.saFolderName;
-            if (this.saLocalFolder) {
-              const data = getFoldersData(false);
-              if (data[folderName]) {
-                delete data[folderName];
-                setFoldersData(false, data);
+            // TODO: delete folders in other sprites?
+            const vars = this.workspace_.variableMap_.getVariablesOfType(this.saListFolder ? "list" : "");
+            ScratchBlocks.Events.disable();
+            for (const variable of vars) {
+              const folderName = folderFromVarName(variable.name);
+              if (folderName === this.saFolderName) {
+                const varName = nameFromVarName(variable.name);
+                renameVariable(variable.getId(), folderToVarName(varName, ""));
               }
             }
-            if (this.saGlobalFolder) {
-              const globalData = getFoldersData(true);
-              if (globalData[folderName]) {
-                delete globalData[folderName];
-                setFoldersData(true, globalData);
-              }
-            }
-            this.workspace_.refreshToolboxSelection_();
+            ScratchBlocks.Events.enable();
           },
         });
 
@@ -510,7 +439,7 @@ export default async function ({ addon, msg, safeMsg, console }) {
     this.CHECKBOX_SIZE = this.ACTUAL_CHECKBOX_SIZE + extraX;
   };
 
-  ScratchBlocks.getMainWorkspace().refreshToolboxSelection_();
-  addon.self.addEventListener("disabled", () => ScratchBlocks.getMainWorkspace().refreshToolboxSelection_());
-  addon.self.addEventListener("reenabled", () => ScratchBlocks.getMainWorkspace().refreshToolboxSelection_());
+  addon.tab.traps.getWorkspace().refreshToolboxSelection_();
+  addon.self.addEventListener("disabled", () => addon.tab.traps.getWorkspace().refreshToolboxSelection_());
+  addon.self.addEventListener("reenabled", () => addon.tab.traps.getWorkspace().refreshToolboxSelection_());
 }

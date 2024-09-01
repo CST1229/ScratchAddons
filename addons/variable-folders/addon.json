@@ -33,8 +33,22 @@
       "matches": ["projects"]
     }
   ],
+  "settings": [
+    {
+      "name": "Hide folder name from variable blocks in block palette",
+      "id": "hideBlockFolderInPalette",
+      "type": "boolean",
+      "default": true
+    },
+    {
+      "name": "Hide folder name from variable blocks in code area",
+      "id": "hideBlockFolderInWorkspace",
+      "type": "boolean",
+      "default": false
+    }
+  ],
   "injectAsStyleElt": true,
   "dynamicDisable": true,
   "dynamicEnable": true,
-  "versionAdded": "1.37.0"
+  "versionAdded": "1.40.0"
 }
