@@ -358,8 +358,7 @@ export default async function ({ addon, console }) {
               "Rename this folder to:",
               this.saFolderName,
               (newName) => {
-                const oldName = this.saFolderName;
-                if (!newName || oldName === newName) return;
+                if (!newName || this.saFolderName === newName) return;
 
                 const ws = this.workspace_;
                 // TODO: rename folders in other sprites?
@@ -367,11 +366,12 @@ export default async function ({ addon, console }) {
                 const vars = ws.variableMap_.getVariablesOfType(this.saListFolder ? "list" : "");
                 ScratchBlocks.Events.setGroup(true);
                 for (const variable of vars) {
-                  const folderName = folderFromVarName(variable.name);
-                  if (folderName === oldName) {
-                    const varName = nameFromVarName(variable.name);
-                    renameVariable(variable.getId(), folderToVarName(varName, newName), true);
-                  }
+                  // with separated sprite-only variables, only rename variables of the same scope
+                  // (as they appear to be in a separate folder with it enabled)
+                  if (!(variable.isLocal && this.saLocalFolder) && !(!variable.isLocal && this.saGlobalFolder)) continue;
+                  if (folderFromVarName(variable.name) !== this.saFolderName) continue;
+                  const varName = nameFromVarName(variable.name);
+                  renameVariable(variable.getId(), folderToVarName(varName, newName), true);
                 }
                 ScratchBlocks.Events.setGroup(false);
                 ws.refreshToolboxSelection_();
@@ -394,11 +394,12 @@ export default async function ({ addon, console }) {
             const vars = ws.variableMap_.getVariablesOfType(this.saListFolder ? "list" : "");
             ScratchBlocks.Events.setGroup(true);
             for (const variable of vars) {
-              const folderName = folderFromVarName(variable.name);
-              if (folderName === this.saFolderName) {
-                const varName = nameFromVarName(variable.name);
-                renameVariable(variable.getId(), folderToVarName(varName, ""), true);
-              }
+              // with separated sprite-only variables, only rename variables of the same scope
+              // (as they appear to be in a separate folder with it enabled)
+              if (!(variable.isLocal && this.saLocalFolder) && !(!variable.isLocal && this.saGlobalFolder)) continue;
+              if (folderFromVarName(variable.name) !== this.saFolderName) continue;
+              const varName = nameFromVarName(variable.name);
+              renameVariable(variable.getId(), folderToVarName(varName, ""), true);
             }
             ScratchBlocks.Events.setGroup(false);
             ws.refreshToolboxSelection_();
