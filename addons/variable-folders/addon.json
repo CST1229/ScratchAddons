@@ -36,13 +36,13 @@
   "settings": [
     {
       "name": "Hide folder name from variable blocks in block palette",
-      "id": "hideBlockFolderInPalette",
+      "id": "hideFolderInPalette",
       "type": "boolean",
       "default": true
     },
     {
       "name": "Hide folder name from variable blocks in code area",
-      "id": "hideBlockFolderInWorkspace",
+      "id": "hideFolderInWorkspace",
       "type": "boolean",
       "default": false
     }

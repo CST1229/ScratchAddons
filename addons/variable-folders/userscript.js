@@ -1,10 +1,9 @@
 import { init, callbacks, SMALL_GAP, BIG_GAP, sharedData } from "../data-category-tweaks-v2/module.js";
+import { updateAllBlocks } from "../../libraries/common/cs/update-all-blocks.js";
 
-export default async function ({ addon, msg, safeMsg, console }) {
+export default async function ({ addon, console }) {
   const ScratchBlocks = await addon.tab.traps.getBlockly();
   const vm = addon.tab.traps.vm;
-
-  const LAST_LINE_REGEX = /(?:\n|^).*\n*$/;
 
   const FOLDER_REGEX = /^\[([^\]]+)\] (.+)$/;
 
@@ -17,26 +16,49 @@ export default async function ({ addon, msg, safeMsg, console }) {
     if (!folderName) return match[1];
     return `[${folderName}] ${match[1]}`;
   };
-  const folderFromVarName = (name) => {
+  const splitVarName = (name) => {
     const match = name.match(FOLDER_REGEX);
-    if (!match) return "";
-    return match[1];
+    if (!match) return ["", name];
+    return [match[1], match[2]];
+  };
+  const folderFromVarName = (name) => {
+    return splitVarName(name)[0];
   };
   const nameFromVarName = (name) => {
-    const match = name.match(FOLDER_REGEX);
-    if (!match) return name;
-    return match[2];
+    return splitVarName(name)[1];
   };
 
-  const renameVariable = (varId, newName, target = null) => {
+  const renameVariable = (varId, newName, withoutGroup = false, target = null) => {
     const ws = addon.tab.traps.getWorkspace();
     const blocklyVar = ws?.getVariableById(varId);
     if (blocklyVar) {
       // if the variable is present in the editing target or is global, rename it through Blockly
-      ws.renameVariableById(varId, newName);
+      if (withoutGroup) {
+        renameVariableUngrouped(ws, blocklyVar, newName);
+      } else {
+        ws.variableMap_.renameVariable(blocklyVar, newName);
+      }
     } else if (target && Object.hasOwnProperty(target.variables, varId)) {
       // rename it through the VM, if the variable and target exists
       target.renameVariable(varId, newName);
+    }
+  };
+
+  // Blockly.VariableMap.prototype.renameVariable but it doesn't create an undo group
+  const renameVariableUngrouped = function (ws, variable, newName) {
+    var type = variable.type;
+    var conflictVar = ws.variableMap_.getVariable(newName, type);
+    var blocks = ws.getAllBlocks();
+    if (!conflictVar) {
+      ws.variableMap_.renameVariableAndUses_(variable, newName, blocks);
+    } else {
+      // We don't want to rename the variable if one with the exact new name
+      // already exists.
+      console.warn('Unexpected conflict when attempting to rename ' +
+        'variable with name: ' + variable.name + ' and id: ' + variable.getId() +
+        ' to new name: ' + newName + '. A variable with the new name already exists' +
+        ' and has id: ' + conflictVar.getId());
+
     }
   };
 
@@ -168,8 +190,9 @@ export default async function ({ addon, msg, safeMsg, console }) {
 
       const variable = block.workspace.getVariableById(block.getVars()[0]);
       if (variable) {
-        const alreadyInFolder = !!folderFromVarName(variable.name);
-        const varName = nameFromVarName(variable.name);
+        const split = splitVarName(variable.name);
+        const alreadyInFolder = !!split[0];
+        const varName = split[1];
 
         // TODO: l10n
         const menuText = alreadyInFolder ? "Move to other folder" : "Add to folder";
@@ -189,6 +212,7 @@ export default async function ({ addon, msg, safeMsg, console }) {
               (_folder) => {
                 if (!_folder) return;
                 renameVariable(variable.getId(), folderToVarName(varName, _folder));
+                block.workspace.refreshToolboxSelection_();
               },
               modalCaption,
               // the broadcast variable type has no extra buttons, so we use it
@@ -203,7 +227,8 @@ export default async function ({ addon, msg, safeMsg, console }) {
             separator: false,
             text: "Remove from folder",
             callback: () => {
-              renameVariable(variable.getId(), folderToVarName(varName, ""));
+              renameVariable(variable.getId(), folderToVarName(varName, ""), false);
+              block.workspace.refreshToolboxSelection_();
             },
           });
         }
@@ -335,18 +360,20 @@ export default async function ({ addon, msg, safeMsg, console }) {
                 const oldName = this.saFolderName;
                 if (!newName || oldName === newName) return;
 
+                const ws = this.workspace_;
                 // TODO: rename folders in other sprites?
                 // TODO: handle variable name conflicts?
-                const vars = this.workspace_.variableMap_.getVariablesOfType(this.saListFolder ? "list" : "");
-                ScratchBlocks.Events.disable();
+                const vars = ws.variableMap_.getVariablesOfType(this.saListFolder ? "list" : "");
+                ScratchBlocks.Events.setGroup(true);
                 for (const variable of vars) {
                   const folderName = folderFromVarName(variable.name);
                   if (folderName === oldName) {
                     const varName = nameFromVarName(variable.name);
-                    renameVariable(variable.getId(), folderToVarName(varName, newName));
+                    renameVariable(variable.getId(), folderToVarName(varName, newName), true);
                   }
                 }
-                ScratchBlocks.Events.enable();
+                ScratchBlocks.Events.setGroup(false);
+                ws.refreshToolboxSelection_();
               },
               // TODO: l10n
               "Rename Folder",
@@ -362,16 +389,18 @@ export default async function ({ addon, msg, safeMsg, console }) {
           enabled: true,
           callback: () => {
             // TODO: delete folders in other sprites?
-            const vars = this.workspace_.variableMap_.getVariablesOfType(this.saListFolder ? "list" : "");
-            ScratchBlocks.Events.disable();
+            const ws = this.workspace_;
+            const vars = ws.variableMap_.getVariablesOfType(this.saListFolder ? "list" : "");
+            ScratchBlocks.Events.setGroup(true);
             for (const variable of vars) {
               const folderName = folderFromVarName(variable.name);
               if (folderName === this.saFolderName) {
                 const varName = nameFromVarName(variable.name);
-                renameVariable(variable.getId(), folderToVarName(varName, ""));
+                renameVariable(variable.getId(), folderToVarName(varName, ""), true);
               }
             }
-            ScratchBlocks.Events.enable();
+            ScratchBlocks.Events.setGroup(false);
+            ws.refreshToolboxSelection_();
           },
         });
 
@@ -387,8 +416,6 @@ export default async function ({ addon, msg, safeMsg, console }) {
       return super.dispose();
     }
   };
-
-  window.ScratchBlocks = ScratchBlocks;
 
   const oldDomToBlock = ScratchBlocks.Xml.domToBlock;
   ScratchBlocks.Xml.domToBlock = function (xmlBlock, workspace) {
@@ -439,7 +466,45 @@ export default async function ({ addon, msg, safeMsg, console }) {
     this.CHECKBOX_SIZE = this.ACTUAL_CHECKBOX_SIZE + extraX;
   };
 
+  let hideInPalette = addon.settings.get("hideFolderInPalette");
+  let hideInWorkspace = addon.settings.get("hideFolderInWorkspace");
+  addon.settings.addEventListener("change", () => {
+    const _hideInPalette = addon.settings.get("hideFolderInPalette");
+    const _hideInWorkspace = addon.settings.get("hideFolderInWorkspace");
+    if (hideInPalette !== _hideInPalette) {
+      hideInPalette = _hideInPalette;
+      addon.tab.traps.getWorkspace().refreshToolboxSelection_();
+    }
+    if (hideInWorkspace !== _hideInWorkspace) {
+      hideInWorkspace = _hideInWorkspace;
+      updateAllBlocks(addon.tab, {updateMainWorkspace: true, updateFlyout: false, updateCategories: false});
+    }
+  });
+
+  const oldGetText = ScratchBlocks.FieldVariableGetter.prototype.getText;
+  ScratchBlocks.FieldVariableGetter.prototype.getText = function() {
+    const text = oldGetText.call(this);
+    if (!text || addon.self.disabled) return text;
+    const isInFlyout = this.sourceBlock_?.isInFlyout;
+    if ((hideInPalette && isInFlyout) || (hideInWorkspace && !isInFlyout)) {
+      return nameFromVarName(text);
+    }
+    return text;
+  };
+  const oldGetDisplayText = ScratchBlocks.FieldVariableGetter.prototype.getDisplayText_;
+  ScratchBlocks.FieldVariableGetter.prototype.getDisplayText_ = function() {
+    const oldText = this.text_;
+    this.text_ = this.getText();
+    const returnValue = oldGetDisplayText.call(this);
+    this.text_ = oldText;
+    return returnValue;
+  };
+
   addon.tab.traps.getWorkspace().refreshToolboxSelection_();
-  addon.self.addEventListener("disabled", () => addon.tab.traps.getWorkspace().refreshToolboxSelection_());
-  addon.self.addEventListener("reenabled", () => addon.tab.traps.getWorkspace().refreshToolboxSelection_());
+  const onDisableEnable = () => {
+    addon.tab.traps.getWorkspace().refreshToolboxSelection_();
+    if (hideInWorkspace) updateAllBlocks(addon.tab, {updateMainWorkspace: true, updateFlyout: false, updateCategories: false});
+  };
+  addon.self.addEventListener("disabled", onDisableEnable);
+  addon.self.addEventListener("reenabled", onDisableEnable);
 }
