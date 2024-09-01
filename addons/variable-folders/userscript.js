@@ -375,7 +375,8 @@ export default async function ({ addon, console }) {
                 for (const variable of vars) {
                   // with separated sprite-only variables, only rename variables of the same scope
                   // (as they appear to be in a separate folder with it enabled)
-                  if (!(variable.isLocal && this.saLocalFolder) && !(!variable.isLocal && this.saGlobalFolder)) continue;
+                  if (!(variable.isLocal && this.saLocalFolder) && !(!variable.isLocal && this.saGlobalFolder))
+                    continue;
                   if (folderFromVarName(variable.name) !== this.saFolderName) continue;
                   const varName = nameFromVarName(variable.name);
                   renameVariable(variable.getId(), folderToVarName(varName, newName), true);
