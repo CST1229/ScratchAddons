@@ -1,7 +1,7 @@
 import { init, callbacks, SMALL_GAP, BIG_GAP, sharedData } from "../data-category-tweaks-v2/module.js";
 import { updateAllBlocks } from "../../libraries/common/cs/update-all-blocks.js";
 
-export default async function ({ addon, console }) {
+export default async function ({ addon, console, msg }) {
   const ScratchBlocks = await addon.tab.traps.getBlockly();
   const vm = addon.tab.traps.vm;
 
@@ -238,10 +238,9 @@ export default async function ({ addon, console }) {
         const alreadyInFolder = !!split[0];
         const varName = split[1];
 
-        // TODO: l10n
-        const menuText = alreadyInFolder ? "Move to other folder" : "Add to folder";
-        const modalCaption = alreadyInFolder ? "Move to Other Folder" : "Add to Folder";
-        const modalMessage = alreadyInFolder ? "Folder to move to:" : "Folder to add to:";
+        const menuText = alreadyInFolder ? msg("context-menu-to-other-folder") : msg("context-menu-add-to-folder");
+        const modalCaption = alreadyInFolder ? msg("modal-caption-move-to-other-folder") : msg("modal-caption-add-to-folder");
+        const modalMessage = alreadyInFolder ? msg("modal-message-move-to-other-folder") : msg("modal-message-add-to-folder");
 
         items.push({
           enabled: true,
@@ -263,12 +262,11 @@ export default async function ({ addon, console }) {
             applyFolderComboBox();
           },
         });
-        // TODO: l10n
         if (alreadyInFolder) {
           items.push({
             enabled: true,
             separator: false,
-            text: "Remove from folder",
+            text: msg("context-menu-remove-from-folder"),
             callback: () => {
               renameVariable(variable.getId(), folderToVarName(varName, ""), false);
               block.workspace.refreshToolboxSelection_();
@@ -402,12 +400,11 @@ export default async function ({ addon, console }) {
         const menuOptions = [];
 
         menuOptions.push({
-          text: "Rename folder",
+          text: msg("context-menu-rename-folder"),
           enabled: true,
           callback: () => {
-            // TODO: l10n
             ScratchBlocks.prompt(
-              "Rename this folder to:",
+              msg("modal-message-rename-folder"),
               this.saFolderName,
               (newName) => {
                 if (!newName || this.saFolderName === newName) return;
@@ -429,17 +426,15 @@ export default async function ({ addon, console }) {
                 ScratchBlocks.Events.setGroup(false);
                 ws.refreshToolboxSelection_();
               },
-              // TODO: l10n
-              "Rename Folder",
+              msg("modal-caption-rename-folder"),
               // the broadcast variable type has no extra buttons, so we use it
               "broadcast_msg"
             );
           },
         });
 
-        // TODO: l10n
         menuOptions.push({
-          text: "Delete folder",
+          text: msg("Delete folder"),
           enabled: true,
           callback: () => {
             // TODO: delete folders in other sprites?

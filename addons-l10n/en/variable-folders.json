@@ -1,0 +1,13 @@
+{
+    "variable-folders/context-menu-add-to-folder": "Add to folder",
+    "variable-folders/context-menu-move-to-other-folder": "Move to other folder",
+    "variable-folders/context-menu-rename-folder": "Rename folder",
+    "variable-folders/modal-caption-add-to-folder": "Add to Folder",
+    "variable-folders/modal-caption-move-to-other-folder": "Move to Other Folder",
+    "variable-folders/modal-caption-rename-folder": "Rename Folder",
+    "variable-folders/modal-message-add-to-folder": "Folder to add to:",
+    "variable-folders/modal-message-move-to-other-folder": "Folder to move to:",
+    "variable-folders/modal-message-rename-folder": "Rename this folder to:",
+    "variable-folders/context-menu-remove-from-folder": "Remove from folder",
+    "variable-folders/context-menu-delete-folder": "Delete folder"
+}
