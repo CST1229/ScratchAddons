@@ -1,4 +1,4 @@
-import { init, callbacks, SMALL_GAP, BIG_GAP, sharedData } from "../data-category-tweaks-v2/module.js";
+import { init, updateFlyoutContent, callbacks, SMALL_GAP, BIG_GAP, sharedData } from "../data-category-tweaks-v2/module.js";
 import { updateAllBlocks } from "../../libraries/common/cs/update-all-blocks.js";
 
 export default async function ({ addon, console, msg }) {
@@ -253,7 +253,7 @@ export default async function ({ addon, console, msg }) {
               (_folder) => {
                 if (!_folder) return;
                 renameVariable(variable.getId(), folderToVarName(varName, _folder));
-                block.workspace.refreshToolboxSelection_();
+                updateFlyoutContent(addon, ScratchBlocks);
               },
               modalCaption,
               // the broadcast variable type has no extra buttons, so we use it
@@ -269,7 +269,7 @@ export default async function ({ addon, console, msg }) {
             text: msg("context-menu-remove-from-folder"),
             callback: () => {
               renameVariable(variable.getId(), folderToVarName(varName, ""), false);
-              block.workspace.refreshToolboxSelection_();
+              updateFlyoutContent(addon, ScratchBlocks);
             },
           });
         }
@@ -318,7 +318,7 @@ export default async function ({ addon, console, msg }) {
               !getFolderCollapsed(stage, this.saFolderType, this.saFolderName)
             );
           }
-          targetWorkspace.refreshToolboxSelection_();
+          updateFlyoutContent(addon, ScratchBlocks);
         };
 
         this.saCollapsed = false;
@@ -424,7 +424,7 @@ export default async function ({ addon, console, msg }) {
                   renameVariable(variable.getId(), folderToVarName(varName, newName), true);
                 }
                 ScratchBlocks.Events.setGroup(false);
-                ws.refreshToolboxSelection_();
+                updateFlyoutContent(addon, ScratchBlocks);
               },
               msg("modal-caption-rename-folder"),
               // the broadcast variable type has no extra buttons, so we use it
@@ -450,7 +450,7 @@ export default async function ({ addon, console, msg }) {
               renameVariable(variable.getId(), folderToVarName(varName, ""), true);
             }
             ScratchBlocks.Events.setGroup(false);
-            ws.refreshToolboxSelection_();
+            updateFlyoutContent(addon, ScratchBlocks);
           },
         });
 
@@ -537,7 +537,7 @@ export default async function ({ addon, console, msg }) {
       updateAllBlocks(addon.tab, { updateMainWorkspace: true, updateFlyout: false, updateCategories: false });
     }
 
-    if (refreshToolbox) addon.tab.traps.getWorkspace().refreshToolboxSelection_();
+    if (refreshToolbox) updateFlyoutContent(addon, ScratchBlocks);
   });
 
   const oldGetText = ScratchBlocks.FieldVariableGetter.prototype.getText;
@@ -559,9 +559,9 @@ export default async function ({ addon, console, msg }) {
     return returnValue;
   };
 
-  addon.tab.traps.getWorkspace().refreshToolboxSelection_();
+  updateFlyoutContent(addon, ScratchBlocks);
   const onDisableEnable = () => {
-    addon.tab.traps.getWorkspace().refreshToolboxSelection_();
+    updateFlyoutContent(addon, ScratchBlocks);
     if (hideFolderInWorkspace)
       updateAllBlocks(addon.tab, { updateMainWorkspace: true, updateFlyout: false, updateCategories: false });
   };

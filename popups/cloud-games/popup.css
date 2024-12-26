@@ -22,6 +22,7 @@ body {
   border-radius: 10px;
   box-shadow: var(--large-shadow);
   font-weight: 600;
+  user-select: none;
 }
 
 .loading-progress {
@@ -39,6 +40,7 @@ body {
   padding-top: 20px;
   font-weight: 600;
   margin: 0 2rem;
+  user-select: none;
 }
 
 .title {
@@ -104,6 +106,10 @@ body {
 .add-button {
   text-align: center;
   padding-top: 0.5rem;
+}
+
+.add-button .large-button {
+  display: inline-flex;
 }
 
 .opened {

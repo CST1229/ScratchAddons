@@ -1,4 +1,4 @@
-import { init, BIG_GAP, SMALL_GAP, callbacks, sharedData } from "./module.js";
+import { init, updateFlyoutContent, BIG_GAP, SMALL_GAP, callbacks, sharedData } from "./module.js";
 import updateToolboxXML from "../../libraries/common/cs/update-toolbox-xml.js";
 
 export default async function ({ addon, console, msg, safeMsg }) {
@@ -107,7 +107,13 @@ export default async function ({ addon, console, msg, safeMsg }) {
     return moveReportersToEnd(variables).concat(moveReportersToEnd(lists));
   };
 
-  const DataCategory = ScratchBlocks.DataCategory;
+  let oldVariableCategoryCallback;
+  if (ScratchBlocks.registry) {
+    // new Blockly
+    oldVariableCategoryCallback = ScratchBlocks.ScratchVariables.getVariablesCategory;
+  } else {
+    oldVariableCategoryCallback = ScratchBlocks.DataCategory;
+  }
   let variableCategory;
   let listCategory;
   const variableCategoryCallback = (workspace, turnIntoFolders) => {
@@ -143,22 +149,39 @@ export default async function ({ addon, console, msg, safeMsg }) {
   vm.runtime.getBlocksXML = function (target) {
     const result = originalGetBlocksXML.call(this, target);
     hasSeparateListCategory = addon ? addon.settings.get("separateListCategory") : false;
-    if (addon && !addon.self.disabled && hasSeparateListCategory) {
+    if (addon && !addon.self.disabled && hasSeparateListCategory) {      let dataPrimary;
+      let dataTertiary;
+      let listsPrimary;
+      let listsTertiary;
+      if (ScratchBlocks.registry) {
+        // New Blockly: we need a workspace (it doesn't matter which one) to get the block styles.
+        // tabAPI.traps.getWorkspace() sometimes throws an error if called inside this function.
+        const theme = ScratchBlocks.common.getMainWorkspace().getTheme();
+        dataPrimary = theme.blockStyles.data.colourPrimary;
+        dataTertiary = theme.blockStyles.data.colourTertiary;
+        listsPrimary = theme.blockStyles.data_lists.colourPrimary;
+        listsTertiary = theme.blockStyles.data_lists.colourTertiary;
+      } else {
+        dataPrimary = ScratchBlocks.Colours.data.primary;
+        dataTertiary = ScratchBlocks.Colours.data.tertiary;
+        listsPrimary = ScratchBlocks.Colours.data_lists.primary;
+        listsTertiary = ScratchBlocks.Colours.data_lists.tertiary;
+      }
       result.push({
         id: "data",
         xml: `
         <category
           name="%{BKY_CATEGORY_VARIABLES}"
-          id="variables"
-          colour="${ScratchBlocks.Colours.data.primary}"
-          secondaryColour="${ScratchBlocks.Colours.data.tertiary}"
+          ${ScratchBlocks.registry ? "toolboxitemid" : "id"}="variables"
+          colour="${dataPrimary}"
+          secondaryColour="${dataTertiary}"
           custom="VARIABLE">
         </category>
         <category
           name="${safeMsg("list-category")}"
-          id="lists"
-          colour="${ScratchBlocks.Colours.data_lists.primary}"
-          secondaryColour="${ScratchBlocks.Colours.data_lists.tertiary}"
+          ${ScratchBlocks.registry ? "toolboxitemid" : "id"}="lists"
+          colour="${listsPrimary}"
+          secondaryColour="${listsTertiary}"
           custom="LIST">
         </category>`,
       });
@@ -187,10 +210,7 @@ export default async function ({ addon, console, msg, safeMsg }) {
       updateToolboxXML(addon.tab);
     }
     if (addon && (addon.settings.get("separateLocalVariables") || addon.settings.get("moveReportersDown"))) {
-      const workspace = ScratchBlocks.getMainWorkspace();
-      if (workspace) {
-        workspace.refreshToolboxSelection_();
-      }
+      updateFlyoutContent(addon, ScratchBlocks);
     }
   };
   updateToolbox();
@@ -209,10 +229,7 @@ export default async function ({ addon, console, msg, safeMsg }) {
     if (addon.settings.get("separateListCategory") !== hasSeparateListCategory) {
       updateToolboxXML(addon.tab);
     } else {
-      const workspace = ScratchBlocks.getMainWorkspace();
-      if (workspace) {
-        workspace.refreshToolboxSelection_();
-      }
+      updateFlyoutContent(addon, ScratchBlocks);
     }
   });
   sharedData.separateLocalVariables = addon.settings.get("separateLocalVariables");
