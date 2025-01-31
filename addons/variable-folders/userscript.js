@@ -1,4 +1,11 @@
-import { init, updateFlyoutContent, callbacks, SMALL_GAP, BIG_GAP, sharedData } from "../data-category-tweaks-v2/module.js";
+import {
+  init,
+  updateFlyoutContent,
+  callbacks,
+  SMALL_GAP,
+  BIG_GAP,
+  sharedData,
+} from "../data-category-tweaks-v2/module.js";
 import { updateAllBlocks } from "../../libraries/common/cs/update-all-blocks.js";
 
 export default async function ({ addon, console, msg }) {
@@ -87,7 +94,7 @@ export default async function ({ addon, console, msg }) {
       return vars;
     }
 
-    const listButtonIndex = vars.findIndex(v => v.getAttribute("callbackkey") === "CREATE_LIST");
+    const listButtonIndex = vars.findIndex((v) => v.getAttribute("callbackkey") === "CREATE_LIST");
     // this is a separated variables/lists category
     if (listButtonIndex === -1 || listButtonIndex === 0) {
       return _turnIntoFolders(vars, ws);
@@ -96,7 +103,7 @@ export default async function ({ addon, console, msg }) {
     // individually turn the variables and lists into folders
     return [
       ..._turnIntoFolders(vars.slice(0, listButtonIndex), ws),
-      ..._turnIntoFolders(vars.slice(listButtonIndex), ws)
+      ..._turnIntoFolders(vars.slice(listButtonIndex), ws),
     ];
   };
 
@@ -253,8 +260,12 @@ export default async function ({ addon, console, msg }) {
         const varName = split[1];
 
         const menuText = alreadyInFolder ? msg("context-menu-to-other-folder") : msg("context-menu-add-to-folder");
-        const modalCaption = alreadyInFolder ? msg("modal-caption-move-to-other-folder") : msg("modal-caption-add-to-folder");
-        const modalMessage = alreadyInFolder ? msg("modal-message-move-to-other-folder") : msg("modal-message-add-to-folder");
+        const modalCaption = alreadyInFolder
+          ? msg("modal-caption-move-to-other-folder")
+          : msg("modal-caption-add-to-folder");
+        const modalMessage = alreadyInFolder
+          ? msg("modal-message-move-to-other-folder")
+          : msg("modal-message-add-to-folder");
 
         items.push({
           enabled: true,

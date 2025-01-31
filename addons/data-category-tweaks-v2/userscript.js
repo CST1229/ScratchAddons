@@ -149,7 +149,8 @@ export default async function ({ addon, console, msg, safeMsg }) {
   vm.runtime.getBlocksXML = function (target) {
     const result = originalGetBlocksXML.call(this, target);
     hasSeparateListCategory = addon ? addon.settings.get("separateListCategory") : false;
-    if (addon && !addon.self.disabled && hasSeparateListCategory) {      let dataPrimary;
+    if (addon && !addon.self.disabled && hasSeparateListCategory) {
+      let dataPrimary;
       let dataTertiary;
       let listsPrimary;
       let listsTertiary;
