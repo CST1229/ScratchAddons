@@ -87,6 +87,20 @@ export default async function ({ addon, console, msg }) {
       return vars;
     }
 
+    const listButtonIndex = vars.findIndex(v => v.getAttribute("callbackkey") === "CREATE_LIST");
+    // this is a separated variables/lists category
+    if (listButtonIndex === -1 || listButtonIndex === 0) {
+      return _turnIntoFolders(vars, ws);
+    }
+
+    // individually turn the variables and lists into folders
+    return [
+      ..._turnIntoFolders(vars.slice(0, listButtonIndex), ws),
+      ..._turnIntoFolders(vars.slice(listButtonIndex), ws)
+    ];
+  };
+
+  const _turnIntoFolders = (vars, ws) => {
     const makeButtonFor = (text, isLocal, isGlobal, folderType) => {
       const label = document.createElement("button");
       label.setAttribute("text", text);
@@ -155,8 +169,8 @@ export default async function ({ addon, console, msg }) {
       }
     };
     for (const el of vars) {
-      // list reporter. we're now in the list category
-      if (el.getAttribute("type") === "data_listcontents") {
+      // list reporter or "create a list" buttton. we're now in the list category
+      if (el.getAttribute("type") === "data_listcontents" || el.getAttribute("callbackkey") === "CREATE_LIST") {
         varType = "list";
       }
       // variable reporter. we add those ourselves

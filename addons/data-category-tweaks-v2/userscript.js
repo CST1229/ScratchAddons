@@ -117,7 +117,7 @@ export default async function ({ addon, console, msg, safeMsg }) {
   let variableCategory;
   let listCategory;
   const variableCategoryCallback = (workspace, turnIntoFolders) => {
-    let result = DataCategory(workspace);
+    let result = oldVariableCategoryCallback(workspace);
 
     if (addon && !addon.self.disabled && addon.settings.get("moveReportersDown")) {
       result = moveReportersDown(result);
