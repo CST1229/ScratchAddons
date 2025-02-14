@@ -8,6 +8,8 @@ import {
 } from "../data-category-tweaks-v2/module.js";
 import { updateAllBlocks } from "../../libraries/common/cs/update-all-blocks.js";
 
+// TODO: maybe don't update the workspace every time a folder is closed/opened?
+// that seems wasteful
 export default async function ({ addon, console, msg }) {
   const ScratchBlocks = await addon.tab.traps.getBlockly();
   const vm = addon.tab.traps.vm;
@@ -229,7 +231,6 @@ export default async function ({ addon, console, msg }) {
     return folders;
   }
   function applyFolderComboBox() {
-    debugger;
     const input = document.querySelector(
       "[class*='prompt_body'] > div > input[class*='prompt_variable-name-text-input']"
     );
@@ -259,7 +260,7 @@ export default async function ({ addon, console, msg }) {
         const alreadyInFolder = !!split[0];
         const varName = split[1];
 
-        const menuText = alreadyInFolder ? msg("context-menu-to-other-folder") : msg("context-menu-add-to-folder");
+        const menuText = alreadyInFolder ? msg("context-menu-move-to-other-folder") : msg("context-menu-add-to-folder");
         const modalCaption = alreadyInFolder
           ? msg("modal-caption-move-to-other-folder")
           : msg("modal-caption-add-to-folder");
@@ -459,12 +460,12 @@ export default async function ({ addon, console, msg }) {
         });
 
         menuOptions.push({
-          text: msg("Delete folder"),
+          text: msg("context-menu-delete-folder"),
           enabled: true,
           callback: () => {
             // TODO: delete folders in other sprites?
             const ws = this.workspace_;
-            const vars = ws.variableMap_.getVariablesOfType(this.saFolderButton);
+            const vars = ws.variableMap_.getVariablesOfType(this.saFolderType);
             ScratchBlocks.Events.setGroup(true);
             for (const variable of vars) {
               // with separated sprite-only variables, only rename variables of the same scope
