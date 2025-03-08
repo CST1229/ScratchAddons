@@ -78,8 +78,8 @@ export default async function ({ template }) {
             isIframe && !this.expanded && (this.addon.info || []).every((item) => item.type !== "warning")
               ? false
               : event.shiftKey
-              ? false
-              : newState;
+                ? false
+                : newState;
           chrome.runtime.sendMessage({ changeEnabledState: { addonId: this.addon._addonId, newState } });
           this.$emit("toggle-addon-request", newState);
         };
@@ -112,7 +112,7 @@ export default async function ({ template }) {
               );
           } else toggle();
         } else toggle();
-        
+
         if (this.addon._addonId == "useless") {
           setTimeout(() => {
             if (this.addon._enabled) toggle();

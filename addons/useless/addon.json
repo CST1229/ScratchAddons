@@ -1,9 +1,6 @@
 {
   "name": "The Useless Addon",
   "description": "It's useless.",
-  "tags": [
-    "popup",
-    "featured"
-  ],
+  "tags": ["popup", "featured"],
   "versionAdded": "1.35.0"
 }
