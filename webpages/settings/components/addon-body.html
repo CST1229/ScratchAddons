@@ -5,12 +5,14 @@
         <div class="btn-dropdown">
           <img src="../../images/icons/expand.svg" alt="v" :class="{'reverted': expanded}" draggable="false" />
         </div>
-        <div class="addon-name tooltip">
-          <img :src="addonIconSrc" class="icon-type" draggable="false" />
-          <span>{{ addon.name}}</span>
-          <span v-if="devMode" class="tooltiptext">{{ addon._addonId }}</span>
+        <img :src="addonIconSrc" class="icon-type addon-icon" draggable="false" />
+        <!-- prettier-ignore -->
+        <div class="addon-name-and-tags">
+          <div class="addon-name tooltip">
+            <span>{{ addon.name}}</span>
+            <span v-if="devMode" class="tooltiptext tooltiptexttop">{{ addon._addonId }}</span>
+          </div><!-- no space --><addon-tag v-for="tag of addon.tags" :tag="tag"></addon-tag>
         </div>
-        <addon-tag v-for="tag of addon.tags" :tag="tag"></addon-tag>
       </div>
       <div class="addon-description" v-show="!expanded" dir="auto">{{ addon.description }}</div>
       <div class="addon-check">
@@ -66,8 +68,7 @@
       >
         <div class="setting-label">{{ msg("preview") }}</div>
         <component
-          :is="'preview-' + addon.addonPreview.type"
-          :options="addon.addonPreview"
+          :is="'preview-' + addon._addonId"
           :settings="addonSettings"
           :hovered-setting-id="hoveredSettingId"
           @areahover="highlightSetting"
@@ -107,6 +108,14 @@
           </button>
         </div>
       </div>
+      <div class="related-addons" v-if="addon._relatedAddons && !isIframe">
+        <div class="addon-message">
+          <span class="related-addons-text">{{msg('relatedAddons')}}</span>
+          <span v-for="addonManifest of addon._relatedAddons">
+            <a @click="openRelated(addonManifest)">{{addonManifest.name}}</a>
+          </span>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -141,23 +150,37 @@
     font-size: 13px;
   }
   .addon-credits a,
+  .related-addons a,
   .addon-license a {
     color: var(--blue-text);
+    cursor: pointer;
   }
 
-  .addon-credits > span {
+  .addon-credits > span,
+  .related-addons span {
     margin-inline-end: 0.5rem;
   }
 
-  .addon-credits > span:not(:first-child):not(:last-child)::after {
+  .addon-credits > span:not(:first-child):not(:last-child)::after,
+  .related-addons span:not(:first-child):not(:last-child)::after {
     content: ",";
   }
-  .addon-name {
+  .related-addons-text {
+    font-weight: bold;
+  }
+
+  .addon-icon {
     margin-inline-start: 10px;
+    padding-bottom: 1px; /* align with addon name */
+    user-select: none;
+  }
+  .addon-name-and-tags {
+    padding: 10px 0;
+  }
+  .addon-name {
     font-weight: 400;
-    height: 100%;
-    display: flex;
-    align-items: center;
+    display: inline-block;
+    vertical-align: middle;
     /* Badges have a 2px bottom border which means the text
        is not vertically centered relative to the addon name
        and description. Fixed by adding 1px bottom padding
@@ -171,11 +194,14 @@
     background-color: var(--gray-text);
     border-radius: 3px;
   }
-  .addon-name > .icon-type {
-    user-select: none;
+  .addon-name-and-tags > .badge {
+    display: inline-block;
+    vertical-align: middle;
+    margin-block: 1px;
   }
+
   .addon-topbar {
-    height: 52px;
+    min-height: 52px;
     padding-inline-end: 10px;
     display: flex;
     align-items: center;
@@ -285,6 +311,13 @@
     margin: 10px 0;
     display: flex;
     align-items: center;
+  }
+  .related-addons > .addon-message {
+    flex-wrap: wrap;
+    padding: 6px;
+    padding-left: 10px;
+    border: none;
+    font-size: 14px;
   }
   .addon-notice {
     border-color: var(--notice-border);
@@ -416,5 +449,64 @@
   }
   [dir="rtl"] .switch[state="on"]::before {
     left: 4px;
+  }
+
+  @media (max-width: 700px) {
+    .addon-description {
+      display: none;
+    }
+    .addon-topbar {
+      min-height: 44px;
+      padding-inline-end: 6px;
+    }
+    .clickable-area {
+      padding-inline-start: 6px;
+    }
+    .addon-icon {
+      margin-inline-end: 6px;
+    }
+    .addon-name-and-tags {
+      padding: 6px 0;
+    }
+    .addon-name {
+      margin-inline-start: 8px;
+    }
+
+    .addon-settings {
+      padding-inline: 16px;
+    }
+    .preview-column {
+      display: none;
+    }
+    .settings-column {
+      flex-direction: column;
+    }
+    .settings-column > .addon-setting {
+      margin: 10px 0;
+      min-height: 0;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .settings-column > .addon-setting.boolean-setting {
+      margin: 5px 0;
+      flex-direction: row;
+      align-items: center;
+    }
+    .settings-column > .addon-setting.boolean-setting .setting-label {
+      margin-bottom: 0;
+    }
+    .presets-column > .setting-label {
+      margin-inline-start: 0;
+      margin-top: 10px;
+      margin-bottom: 0;
+      width: 100%;
+    }
+    .presets-column > .addon-setting {
+      margin: 5px 0;
+      margin-inline-end: 10px;
+    }
+    .presets-column > .addon-setting:last-child {
+      margin-inline-end: 0;
+    }
   }
 </style>
